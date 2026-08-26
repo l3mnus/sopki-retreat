@@ -1,0 +1,33 @@
+# Служебные файлы Claude Code (конфиг локального сервера и прочее)
+.claude/
+
+# Системные файлы Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Системные файлы macOS
+.DS_Store
+._*
+
+# Настройки редакторов
+.vscode/
+.idea/
+*.sublime-workspace
+*.code-workspace
+
+# Временные файлы и черновики
+*.tmp
+*.temp
+*.bak
+*.log
+*.swp
+*~
+
+# Исходники медиа до сжатия (в репозиторий попадают только WebP / MP4 / WebM)
+assets/images/_src/
+assets/video/_src/
+*.psd
+*.ai
+*.mov

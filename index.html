@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <title>Sopki Retreat — бутик-отель на Кольском полуострове</title>
+  <meta name="description" content="ПЛЕЙСХОЛДЕР. Камерный бутик-отель в сопках Мурманской области: охота за северным сиянием, баня, снегоходы, трансфер из аэропорта.">
+  <meta name="theme-color" content="#0d0f12">
+  <link rel="canonical" href="https://example.com/">
+
+  <!-- Open Graph — ПЛЕЙСХОЛДЕР, финальные тексты и og:image позже -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Sopki Retreat">
+  <meta property="og:title" content="Sopki Retreat — бутик-отель на Кольском полуострове">
+  <meta property="og:description" content="ПЛЕЙСХОЛДЕР. Охота за северным сиянием в камерном ретрите.">
+  <meta property="og:image" content="assets/images/og-cover.webp">
+
+  <!-- Иконки — файлы появятся позже
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  -->
+
+  <!-- Шрифты подключаются локально из /fonts через @font-face в styles.css (без CDN) -->
+  <link rel="preload" href="fonts/cormorant-garamond-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/manrope-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+
+  <header class="site-header" id="top">
+    <div class="container site-header__inner">
+      <a class="logo" href="#top" aria-label="Sopki Retreat — на главную">Sopki&nbsp;Retreat</a>
+
+      <nav class="site-nav" aria-label="Основная навигация">
+        <ul class="site-nav__list">
+          <li><a href="#about">О ретрите</a></li>
+          <li><a href="#rooms">Номера</a></li>
+          <li><a href="#booking">Бронирование</a></li>
+          <li><a href="#services">Услуги</a></li>
+          <li><a href="#gallery">Галерея</a></li>
+          <li><a href="#location">Как добраться</a></li>
+          <li><a href="#contacts">Контакты</a></li>
+        </ul>
+      </nav>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav-mobile">
+        <span class="visually-hidden">Открыть меню</span>
+        <span class="nav-toggle__bars" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- 1. HERO -->
+    <section class="hero" id="hero" aria-labelledby="hero-title">
+      <video class="hero__video" autoplay muted loop playsinline preload="metadata"
+             poster="assets/images/hero-poster.webp" aria-hidden="true" tabindex="-1">
+        <source src="assets/video/hero.webm" type="video/webm">
+        <source src="assets/video/hero.mp4" type="video/mp4">
+      </video>
+      <div class="hero__scrim" aria-hidden="true"></div>
+
+      <div class="container hero__content">
+        <p class="hero__eyebrow">ПЛЕЙСХОЛДЕР · Кольский полуостров</p>
+        <h1 class="hero__title" id="hero-title">Sopki Retreat</h1>
+        <p class="hero__tagline">ПЛЕЙСХОЛДЕР слогана — одна строка о тишине, сопках и северном сиянии.</p>
+        <a class="btn btn--primary" href="#booking">Забронировать</a>
+      </div>
+    </section>
+
+    <!-- 2. О РЕТРИТЕ -->
+    <section class="section about" id="about" aria-labelledby="about-title">
+      <div class="container">
+        <p class="section__eyebrow">01 — О ретрите</p>
+        <h2 class="section__title" id="about-title">ПЛЕЙСХОЛДЕР заголовка блока «О ретрите»</h2>
+
+        <div class="about__grid">
+          <div class="about__lead">
+            <p>ПЛЕЙСХОЛДЕР. Абзац о позиционировании: камерный ретрит, уединение, сопки, вид на долину.</p>
+            <p>ПЛЕЙСХОЛДЕР. Абзац об охоте за северным сиянием: сезон, прогноз активности, выезды в тёмную зону.</p>
+          </div>
+
+          <ul class="about__facts">
+            <li class="fact">
+              <span class="fact__value">ПЛЕЙСХОЛДЕР</span>
+              <span class="fact__label">номеров</span>
+            </li>
+            <li class="fact">
+              <span class="fact__value">ПЛЕЙСХОЛДЕР</span>
+              <span class="fact__label">сезон сияния</span>
+            </li>
+            <li class="fact">
+              <span class="fact__value">ПЛЕЙСХОЛДЕР</span>
+              <span class="fact__label">км до аэропорта</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. НОМЕРА -->
+    <section class="section rooms" id="rooms" aria-labelledby="rooms-title">
+      <div class="container">
+        <p class="section__eyebrow">02 — Номера</p>
+        <h2 class="section__title" id="rooms-title">ПЛЕЙСХОЛДЕР заголовка блока «Номера»</h2>
+
+        <ul class="rooms__list">
+          <li class="room-card">
+            <figure class="room-card__media">
+              <img src="assets/images/room-1.webp" alt="ПЛЕЙСХОЛДЕР описания фото номера" width="800" height="600" loading="lazy" decoding="async">
+            </figure>
+            <div class="room-card__body">
+              <h3 class="room-card__title">ПЛЕЙСХОЛДЕР — название номера</h3>
+              <p class="room-card__text">ПЛЕЙСХОЛДЕР. Два-три предложения: площадь, вид из окна, что входит.</p>
+              <p class="room-card__price"><span class="visually-hidden">Цена: </span>ПЛЕЙСХОЛДЕР ₽ / ночь</p>
+              <a class="btn btn--ghost" href="#booking">Выбрать даты</a>
+            </div>
+          </li>
+
+          <li class="room-card">
+            <figure class="room-card__media">
+              <img src="assets/images/room-2.webp" alt="ПЛЕЙСХОЛДЕР описания фото номера" width="800" height="600" loading="lazy" decoding="async">
+            </figure>
+            <div class="room-card__body">
+              <h3 class="room-card__title">ПЛЕЙСХОЛДЕР — название номера</h3>
+              <p class="room-card__text">ПЛЕЙСХОЛДЕР. Два-три предложения: площадь, вид из окна, что входит.</p>
+              <p class="room-card__price"><span class="visually-hidden">Цена: </span>ПЛЕЙСХОЛДЕР ₽ / ночь</p>
+              <a class="btn btn--ghost" href="#booking">Выбрать даты</a>
+            </div>
+          </li>
+
+          <li class="room-card">
+            <figure class="room-card__media">
+              <img src="assets/images/room-3.webp" alt="ПЛЕЙСХОЛДЕР описания фото номера" width="800" height="600" loading="lazy" decoding="async">
+            </figure>
+            <div class="room-card__body">
+              <h3 class="room-card__title">ПЛЕЙСХОЛДЕР — название номера</h3>
+              <p class="room-card__text">ПЛЕЙСХОЛДЕР. Два-три предложения: площадь, вид из окна, что входит.</p>
+              <p class="room-card__price"><span class="visually-hidden">Цена: </span>ПЛЕЙСХОЛДЕР ₽ / ночь</p>
+              <a class="btn btn--ghost" href="#booking">Выбрать даты</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 4. ДЕМО-КАЛЕНДАРЬ БРОНИРОВАНИЯ (визуальная демонстрация, без бэкенда) -->
+    <section class="section booking" id="booking" aria-labelledby="booking-title">
+      <div class="container">
+        <p class="section__eyebrow">03 — Бронирование</p>
+        <h2 class="section__title" id="booking-title">ПЛЕЙСХОЛДЕР заголовка блока «Календарь»</h2>
+        <p class="booking__note">
+          Демонстрационный календарь: занятость номеров задана статично, заявка никуда не отправляется.
+        </p>
+
+        <div class="booking__layout">
+          <!-- Разметка-заготовка. Сетку дней и логику выбора дат добавит script.js отдельной задачей. -->
+          <div class="calendar" data-calendar>
+            <div class="calendar__header">
+              <button class="calendar__nav" type="button" data-calendar-prev aria-label="Предыдущий месяц">&larr;</button>
+              <h3 class="calendar__month" data-calendar-month aria-live="polite">ПЛЕЙСХОЛДЕР — месяц, год</h3>
+              <button class="calendar__nav" type="button" data-calendar-next aria-label="Следующий месяц">&rarr;</button>
+            </div>
+
+            <div class="calendar__weekdays" aria-hidden="true">
+              <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+            </div>
+
+            <div class="calendar__grid" data-calendar-grid role="grid" aria-label="Календарь доступных дат">
+              <!-- Дни генерируются в script.js -->
+            </div>
+
+            <ul class="calendar__legend">
+              <li><span class="legend-dot legend-dot--free" aria-hidden="true"></span>Свободно</li>
+              <li><span class="legend-dot legend-dot--busy" aria-hidden="true"></span>Занято</li>
+              <li><span class="legend-dot legend-dot--selected" aria-hidden="true"></span>Ваш выбор</li>
+            </ul>
+          </div>
+
+          <aside class="booking__summary" aria-label="Параметры брони">
+            <dl class="booking__summary-list">
+              <div><dt>Заезд</dt><dd data-booking-checkin>—</dd></div>
+              <div><dt>Выезд</dt><dd data-booking-checkout>—</dd></div>
+              <div><dt>Ночей</dt><dd data-booking-nights>—</dd></div>
+            </dl>
+            <button class="btn btn--primary" type="button" data-booking-submit disabled>
+              Отправить заявку
+            </button>
+            <p class="booking__disclaimer">ПЛЕЙСХОЛДЕР дисклеймера о демонстрационном характере формы.</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. УСЛУГИ / АМЕНИТИ -->
+    <section class="section services" id="services" aria-labelledby="services-title">
+      <div class="container">
+        <p class="section__eyebrow">04 — Услуги</p>
+        <h2 class="section__title" id="services-title">ПЛЕЙСХОЛДЕР заголовка блока «Услуги»</h2>
+
+        <ul class="services__list">
+          <li class="service-card">
+            <h3 class="service-card__title">Баня и спа</h3>
+            <p class="service-card__text">ПЛЕЙСХОЛДЕР. Короткое описание услуги в одно-два предложения.</p>
+          </li>
+          <li class="service-card">
+            <h3 class="service-card__title">Снегоходы и хайкинг</h3>
+            <p class="service-card__text">ПЛЕЙСХОЛДЕР. Короткое описание услуги в одно-два предложения.</p>
+          </li>
+          <li class="service-card">
+            <h3 class="service-card__title">Трансфер из аэропорта</h3>
+            <p class="service-card__text">ПЛЕЙСХОЛДЕР. Короткое описание услуги в одно-два предложения.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 6. ГАЛЕРЕЯ -->
+    <section class="section gallery" id="gallery" aria-labelledby="gallery-title">
+      <div class="container">
+        <p class="section__eyebrow">05 — Галерея</p>
+        <h2 class="section__title" id="gallery-title">ПЛЕЙСХОЛДЕР заголовка блока «Галерея»</h2>
+
+        <ul class="gallery__grid">
+          <li class="gallery__item">
+            <figure>
+              <img src="assets/images/gallery-1.webp" alt="ПЛЕЙСХОЛДЕР описания снимка" width="900" height="600" loading="lazy" decoding="async">
+            </figure>
+          </li>
+          <li class="gallery__item">
+            <figure>
+              <img src="assets/images/gallery-2.webp" alt="ПЛЕЙСХОЛДЕР описания снимка" width="900" height="600" loading="lazy" decoding="async">
+            </figure>
+          </li>
+          <li class="gallery__item">
+            <figure>
+              <img src="assets/images/gallery-3.webp" alt="ПЛЕЙСХОЛДЕР описания снимка" width="900" height="600" loading="lazy" decoding="async">
+            </figure>
+          </li>
+          <li class="gallery__item">
+            <figure>
+              <img src="assets/images/gallery-4.webp" alt="ПЛЕЙСХОЛДЕР описания снимка" width="900" height="600" loading="lazy" decoding="async">
+            </figure>
+          </li>
+          <li class="gallery__item">
+            <figure>
+              <img src="assets/images/gallery-5.webp" alt="ПЛЕЙСХОЛДЕР описания снимка" width="900" height="600" loading="lazy" decoding="async">
+            </figure>
+          </li>
+          <li class="gallery__item">
+            <figure>
+              <img src="assets/images/gallery-6.webp" alt="ПЛЕЙСХОЛДЕР описания снимка" width="900" height="600" loading="lazy" decoding="async">
+            </figure>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 7. КАК ДОБРАТЬСЯ / ЛОКАЦИЯ -->
+    <section class="section location" id="location" aria-labelledby="location-title">
+      <div class="container">
+        <p class="section__eyebrow">06 — Локация</p>
+        <h2 class="section__title" id="location-title">ПЛЕЙСХОЛДЕР заголовка блока «Как добраться»</h2>
+
+        <div class="location__layout">
+          <div class="location__map">
+            <!-- ПЛЕЙСХОЛДЕР карты. Вставить статичное изображение или iframe позже. -->
+            <p class="location__map-stub">Здесь будет карта</p>
+          </div>
+
+          <ol class="location__steps">
+            <li>
+              <h3 class="location__step-title">Самолётом</h3>
+              <p>ПЛЕЙСХОЛДЕР. Аэропорт, время в пути, частота рейсов.</p>
+            </li>
+            <li>
+              <h3 class="location__step-title">Трансфером</h3>
+              <p>ПЛЕЙСХОЛДЕР. Как встречаем, сколько ехать, что взять с собой.</p>
+            </li>
+            <li>
+              <h3 class="location__step-title">На своём авто</h3>
+              <p>ПЛЕЙСХОЛДЕР. Дорога, парковка, зимние ограничения.</p>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 8. КОНТАКТЫ / FOOTER -->
+  <footer class="site-footer" id="contacts" aria-labelledby="contacts-title">
+    <div class="container">
+      <p class="section__eyebrow">07 — Контакты</p>
+      <h2 class="section__title" id="contacts-title">ПЛЕЙСХОЛДЕР заголовка блока «Контакты»</h2>
+
+      <div class="site-footer__grid">
+        <address class="contacts">
+          <p class="contacts__row">
+            <span class="contacts__label">Телефон</span>
+            <a href="tel:+70000000000">ПЛЕЙСХОЛДЕР телефона</a>
+          </p>
+          <p class="contacts__row">
+            <span class="contacts__label">Почта</span>
+            <a href="mailto:hello@example.com">ПЛЕЙСХОЛДЕР почты</a>
+          </p>
+          <p class="contacts__row">
+            <span class="contacts__label">Адрес</span>
+            <span>ПЛЕЙСХОЛДЕР адреса, Мурманская область</span>
+          </p>
+        </address>
+
+        <div class="site-footer__brand">
+          <p class="logo logo--footer">Sopki&nbsp;Retreat</p>
+          <p class="site-footer__note">ПЛЕЙСХОЛДЕР. Одна строка о проекте.</p>
+        </div>
+      </div>
+
+      <div class="site-footer__bottom">
+        <p class="site-footer__copy">&copy; <span data-year>2026</span> Sopki Retreat. Вымышленный проект для портфолио.</p>
+        <a class="site-footer__top-link" href="#top">Наверх</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
