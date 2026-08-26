@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  <title>Sopki Retreat — бутик-отель на Кольском полуострове</title>
-  <meta name="description" content="ПЛЕЙСХОЛДЕР. Камерный бутик-отель в сопках Мурманской области: охота за северным сиянием, баня, снегоходы, трансфер из аэропорта.">
-  <meta name="theme-color" content="#0d0f12">
+  <title>Sopki Retreat</title>
+  <meta name="description" content="Камерный ретрит на дороге между Мурманском и Териберкой — там, где сопки выходят к океану">
+  <meta name="theme-color" content="#0E1512">
   <link rel="canonical" href="https://example.com/">
 
-  <!-- Open Graph — ПЛЕЙСХОЛДЕР, финальные тексты и og:image позже -->
+  <!-- Open Graph — og:image добавить позже -->
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ru_RU">
   <meta property="og:site_name" content="Sopki Retreat">
-  <meta property="og:title" content="Sopki Retreat — бутик-отель на Кольском полуострове">
-  <meta property="og:description" content="ПЛЕЙСХОЛДЕР. Охота за северным сиянием в камерном ретрите.">
+  <meta property="og:title" content="Sopki Retreat">
+  <meta property="og:description" content="Камерный ретрит на дороге между Мурманском и Териберкой — там, где сопки выходят к океану">
   <meta property="og:image" content="assets/images/og-cover.webp">
 
   <!-- Иконки — файлы появятся позже
@@ -67,10 +67,11 @@
       <div class="hero__scrim" aria-hidden="true"></div>
 
       <div class="container hero__content">
-        <p class="hero__eyebrow">ПЛЕЙСХОЛДЕР · Кольский полуостров</p>
+        <p class="hero__eyebrow">КОЛЬСКИЙ ПОЛУОСТРОВ</p>
         <h1 class="hero__title" id="hero-title">Sopki Retreat</h1>
-        <p class="hero__tagline">ПЛЕЙСХОЛДЕР слогана — одна строка о тишине, сопках и северном сиянии.</p>
-        <a class="btn btn--primary" href="#booking">Забронировать</a>
+        <p class="hero__tagline">Пока город спит, здесь зеленеет небо</p>
+        <p class="hero__subtitle">Камерный ретрит на дороге между Мурманском и Териберкой — там, где сопки выходят к океану</p>
+        <a class="btn btn--primary" href="#booking">Проверить свободные даты</a>
       </div>
     </section>
 
@@ -78,25 +79,35 @@
     <section class="section about" id="about" aria-labelledby="about-title">
       <div class="container">
         <p class="section__eyebrow">01 — О ретрите</p>
-        <h2 class="section__title" id="about-title">ПЛЕЙСХОЛДЕР заголовка блока «О ретрите»</h2>
+        <h2 class="section__title" id="about-title">Здесь охотятся дважды: тихо — днём, за небом — ночью</h2>
 
         <div class="about__grid">
           <div class="about__lead">
-            <p>ПЛЕЙСХОЛДЕР. Абзац о позиционировании: камерный ретрит, уединение, сопки, вид на долину.</p>
-            <p>ПЛЕЙСХОЛДЕР. Абзац об охоте за северным сиянием: сезон, прогноз активности, выезды в тёмную зону.</p>
+            <p>Sopki Retreat — восемь номеров на дороге между Мурманском и Териберкой, там, где северная тайга уступает место лесотундре, а у самого берега — уже настоящей тундре.</p>
+            <p>Прямо на сайте мы показываем текущую вероятность сияния: смотрите прогноз и решайте сами, стоит ли сегодня выйти на улицу. А август и сентябрь здесь — время тихой охоты: грибы и ягоды в сопках, и первые ночи, когда небо снова начинает зеленеть.</p>
+
+            <div class="aurora-widget" data-aurora>
+              <h3 class="aurora-widget__title">Вероятность сияния сегодня</h3>
+              <p class="aurora-widget__state" data-aurora-state aria-live="polite">Загружаем прогноз…</p>
+              <p class="aurora-widget__result" data-aurora-result hidden>
+                <span class="aurora-widget__kp" data-aurora-kp></span>
+                <span class="aurora-widget__label" data-aurora-label></span>
+              </p>
+              <p class="aurora-widget__source">Данные: NOAA SWPC</p>
+            </div>
           </div>
 
           <ul class="about__facts">
             <li class="fact">
-              <span class="fact__value">ПЛЕЙСХОЛДЕР</span>
+              <span class="fact__value">8</span>
               <span class="fact__label">номеров</span>
             </li>
             <li class="fact">
-              <span class="fact__value">ПЛЕЙСХОЛДЕР</span>
+              <span class="fact__value">Сентябрь – Апрель</span>
               <span class="fact__label">сезон сияния</span>
             </li>
             <li class="fact">
-              <span class="fact__value">ПЛЕЙСХОЛДЕР</span>
+              <span class="fact__value">60</span>
               <span class="fact__label">км до аэропорта</span>
             </li>
           </ul>
@@ -108,41 +119,42 @@
     <section class="section rooms" id="rooms" aria-labelledby="rooms-title">
       <div class="container">
         <p class="section__eyebrow">02 — Номера</p>
-        <h2 class="section__title" id="rooms-title">ПЛЕЙСХОЛДЕР заголовка блока «Номера»</h2>
+        <h2 class="section__title" id="rooms-title">Номера</h2>
+        <p class="rooms__note">Восемь номеров — северная простота снаружи, полный комфорт внутри</p>
 
         <ul class="rooms__list">
           <li class="room-card">
             <figure class="room-card__media">
-              <img src="assets/images/room-1.webp" alt="ПЛЕЙСХОЛДЕР описания фото номера" width="800" height="600" loading="lazy" decoding="async">
+              <img src="assets/images/room-1.webp" alt="Тёмная спальня с окном в потолке в номере Aurora Cabin" width="800" height="600" loading="lazy" decoding="async">
             </figure>
             <div class="room-card__body">
-              <h3 class="room-card__title">ПЛЕЙСХОЛДЕР — название номера</h3>
-              <p class="room-card__text">ПЛЕЙСХОЛДЕР. Два-три предложения: площадь, вид из окна, что входит.</p>
-              <p class="room-card__price"><span class="visually-hidden">Цена: </span>ПЛЕЙСХОЛДЕР ₽ / ночь</p>
+              <h3 class="room-card__title">Aurora Cabin</h3>
+              <p class="room-card__text">Отдельный домик с тёмной спальней и окном в потолке: сияние можно ловить лёжа</p>
+              <p class="room-card__price"><span class="visually-hidden">Цена: </span>24 000 ₽ / ночь</p>
               <a class="btn btn--ghost" href="#booking">Выбрать даты</a>
             </div>
           </li>
 
           <li class="room-card">
             <figure class="room-card__media">
-              <img src="assets/images/room-2.webp" alt="ПЛЕЙСХОЛДЕР описания фото номера" width="800" height="600" loading="lazy" decoding="async">
+              <img src="assets/images/room-2.webp" alt="Панорамные окна и терраса номера Fjeld Suite с видом на сопки" width="800" height="600" loading="lazy" decoding="async">
             </figure>
             <div class="room-card__body">
-              <h3 class="room-card__title">ПЛЕЙСХОЛДЕР — название номера</h3>
-              <p class="room-card__text">ПЛЕЙСХОЛДЕР. Два-три предложения: площадь, вид из окна, что входит.</p>
-              <p class="room-card__price"><span class="visually-hidden">Цена: </span>ПЛЕЙСХОЛДЕР ₽ / ночь</p>
+              <h3 class="room-card__title">Fjeld Suite</h3>
+              <p class="room-card__text">Панорамный люкс с видом на сопки и собственной террасой</p>
+              <p class="room-card__price"><span class="visually-hidden">Цена: </span>19 000 ₽ / ночь</p>
               <a class="btn btn--ghost" href="#booking">Выбрать даты</a>
             </div>
           </li>
 
           <li class="room-card">
             <figure class="room-card__media">
-              <img src="assets/images/room-3.webp" alt="ПЛЕЙСХОЛДЕР описания фото номера" width="800" height="600" loading="lazy" decoding="async">
+              <img src="assets/images/room-3.webp" alt="Камин и тёплый интерьер номера Ember Room" width="800" height="600" loading="lazy" decoding="async">
             </figure>
             <div class="room-card__body">
-              <h3 class="room-card__title">ПЛЕЙСХОЛДЕР — название номера</h3>
-              <p class="room-card__text">ПЛЕЙСХОЛДЕР. Два-три предложения: площадь, вид из окна, что входит.</p>
-              <p class="room-card__price"><span class="visually-hidden">Цена: </span>ПЛЕЙСХОЛДЕР ₽ / ночь</p>
+              <h3 class="room-card__title">Ember Room</h3>
+              <p class="room-card__text">Камерный номер с камином, для тех, кто выбирает тепло вместо панорамы</p>
+              <p class="room-card__price"><span class="visually-hidden">Цена: </span>14 000 ₽ / ночь</p>
               <a class="btn btn--ghost" href="#booking">Выбрать даты</a>
             </div>
           </li>
@@ -154,9 +166,9 @@
     <section class="section booking" id="booking" aria-labelledby="booking-title">
       <div class="container">
         <p class="section__eyebrow">03 — Бронирование</p>
-        <h2 class="section__title" id="booking-title">ПЛЕЙСХОЛДЕР заголовка блока «Календарь»</h2>
+        <h2 class="section__title" id="booking-title">Проверьте свободные даты</h2>
         <p class="booking__note">
-          Демонстрационный календарь: занятость номеров задана статично, заявка никуда не отправляется.
+          Выберите даты заезда — покажем, какие номера свободны
         </p>
 
         <div class="booking__layout">
@@ -192,7 +204,7 @@
             <button class="btn btn--primary" type="button" data-booking-submit disabled>
               Отправить заявку
             </button>
-            <p class="booking__disclaimer">ПЛЕЙСХОЛДЕР дисклеймера о демонстрационном характере формы.</p>
+            <p class="booking__disclaimer">Это демонстрационный календарь: даты и занятость показаны для примера, заявка на бронирование никуда не отправляется.</p>
           </aside>
         </div>
       </div>
@@ -202,20 +214,24 @@
     <section class="section services" id="services" aria-labelledby="services-title">
       <div class="container">
         <p class="section__eyebrow">04 — Услуги</p>
-        <h2 class="section__title" id="services-title">ПЛЕЙСХОЛДЕР заголовка блока «Услуги»</h2>
+        <h2 class="section__title" id="services-title">Не только небо</h2>
 
         <ul class="services__list">
           <li class="service-card">
             <h3 class="service-card__title">Баня и спа</h3>
-            <p class="service-card__text">ПЛЕЙСХОЛДЕР. Короткое описание услуги в одно-два предложения.</p>
+            <p class="service-card__text">Баня на дровах и купель под открытым небом, после — травяной чай у камина</p>
           </li>
           <li class="service-card">
-            <h3 class="service-card__title">Снегоходы и хайкинг</h3>
-            <p class="service-card__text">ПЛЕЙСХОЛДЕР. Короткое описание услуги в одно-два предложения.</p>
+            <h3 class="service-card__title">Маршруты по Кольскому</h3>
+            <p class="service-card__text">Авторские туры с местным гидом: Териберка, заброшенные посёлки, побережье Баренцева моря</p>
+          </li>
+          <li class="service-card">
+            <h3 class="service-card__title">Снегоходы и квадроциклы</h3>
+            <p class="service-card__text">Зимой снегоходы, летом квадроциклы и хайкинг, маршруты по сопкам с гидом</p>
           </li>
           <li class="service-card">
             <h3 class="service-card__title">Трансфер из аэропорта</h3>
-            <p class="service-card__text">ПЛЕЙСХОЛДЕР. Короткое описание услуги в одно-два предложения.</p>
+            <p class="service-card__text">Забираем из Мурманска, дорога — часть впечатления, не пересадка</p>
           </li>
         </ul>
       </div>
@@ -225,37 +241,37 @@
     <section class="section gallery" id="gallery" aria-labelledby="gallery-title">
       <div class="container">
         <p class="section__eyebrow">05 — Галерея</p>
-        <h2 class="section__title" id="gallery-title">ПЛЕЙСХОЛДЕР заголовка блока «Галерея»</h2>
+        <h2 class="section__title" id="gallery-title">Здесь всегда есть, на что смотреть</h2>
 
         <ul class="gallery__grid">
           <li class="gallery__item">
             <figure>
-              <img src="assets/images/gallery-1.webp" alt="ПЛЕЙСХОЛДЕР описания снимка" width="900" height="600" loading="lazy" decoding="async">
+              <img src="assets/images/gallery-1.webp" alt="Сопки Кольского полуострова на закате" width="900" height="600" loading="lazy" decoding="async">
             </figure>
           </li>
           <li class="gallery__item">
             <figure>
-              <img src="assets/images/gallery-2.webp" alt="ПЛЕЙСХОЛДЕР описания снимка" width="900" height="600" loading="lazy" decoding="async">
+              <img src="assets/images/gallery-2.webp" alt="Северное сияние над тундрой" width="900" height="600" loading="lazy" decoding="async">
             </figure>
           </li>
           <li class="gallery__item">
             <figure>
-              <img src="assets/images/gallery-3.webp" alt="ПЛЕЙСХОЛДЕР описания снимка" width="900" height="600" loading="lazy" decoding="async">
+              <img src="assets/images/gallery-3.webp" alt="Баня на дровах с видом на лес" width="900" height="600" loading="lazy" decoding="async">
             </figure>
           </li>
           <li class="gallery__item">
             <figure>
-              <img src="assets/images/gallery-4.webp" alt="ПЛЕЙСХОЛДЕР описания снимка" width="900" height="600" loading="lazy" decoding="async">
+              <img src="assets/images/gallery-4.webp" alt="Снегоход на фоне заснеженных сопок" width="900" height="600" loading="lazy" decoding="async">
             </figure>
           </li>
           <li class="gallery__item">
             <figure>
-              <img src="assets/images/gallery-5.webp" alt="ПЛЕЙСХОЛДЕР описания снимка" width="900" height="600" loading="lazy" decoding="async">
+              <img src="assets/images/gallery-5.webp" alt="Тёплый интерьер номера с камином" width="900" height="600" loading="lazy" decoding="async">
             </figure>
           </li>
           <li class="gallery__item">
             <figure>
-              <img src="assets/images/gallery-6.webp" alt="ПЛЕЙСХОЛДЕР описания снимка" width="900" height="600" loading="lazy" decoding="async">
+              <img src="assets/images/gallery-6.webp" alt="Каменистый берег Баренцева моря у Териберки" width="900" height="600" loading="lazy" decoding="async">
             </figure>
           </li>
         </ul>
@@ -266,7 +282,7 @@
     <section class="section location" id="location" aria-labelledby="location-title">
       <div class="container">
         <p class="section__eyebrow">06 — Локация</p>
-        <h2 class="section__title" id="location-title">ПЛЕЙСХОЛДЕР заголовка блока «Как добраться»</h2>
+        <h2 class="section__title" id="location-title">Как добраться</h2>
 
         <div class="location__layout">
           <div class="location__map">
@@ -277,15 +293,15 @@
           <ol class="location__steps">
             <li>
               <h3 class="location__step-title">Самолётом</h3>
-              <p>ПЛЕЙСХОЛДЕР. Аэропорт, время в пути, частота рейсов.</p>
+              <p>Ближайший аэропорт — Мурманск (MMK), прямые рейсы из Москвы и Санкт-Петербурга.</p>
             </li>
             <li>
               <h3 class="location__step-title">Трансфером</h3>
-              <p>ПЛЕЙСХОЛДЕР. Как встречаем, сколько ехать, что взять с собой.</p>
+              <p>Встретим у трапа и довезём с комфортом, до 60 минут в пути.</p>
             </li>
             <li>
               <h3 class="location__step-title">На своём авто</h3>
-              <p>ПЛЕЙСХОЛДЕР. Дорога, парковка, зимние ограничения.</p>
+              <p>Трасса Р-21 «Кола» до поворота на Туманный, дальше по нашим ориентирам.</p>
             </li>
           </ol>
         </div>
@@ -298,32 +314,32 @@
   <footer class="site-footer" id="contacts" aria-labelledby="contacts-title">
     <div class="container">
       <p class="section__eyebrow">07 — Контакты</p>
-      <h2 class="section__title" id="contacts-title">ПЛЕЙСХОЛДЕР заголовка блока «Контакты»</h2>
+      <h2 class="section__title" id="contacts-title">Забронировать</h2>
 
       <div class="site-footer__grid">
         <address class="contacts">
           <p class="contacts__row">
             <span class="contacts__label">Телефон</span>
-            <a href="tel:+70000000000">ПЛЕЙСХОЛДЕР телефона</a>
+            <a href="tel:+79210000000">+7 (921) 000-00-00</a>
           </p>
           <p class="contacts__row">
             <span class="contacts__label">Почта</span>
-            <a href="mailto:hello@example.com">ПЛЕЙСХОЛДЕР почты</a>
+            <a href="mailto:hello@sopki-retreat.ru">hello@sopki-retreat.ru</a>
           </p>
           <p class="contacts__row">
             <span class="contacts__label">Адрес</span>
-            <span>ПЛЕЙСХОЛДЕР адреса, Мурманская область</span>
+            <span>Мурманская область, автодорога Р-21 «Кола» — Териберка, 47 км</span>
           </p>
         </address>
 
         <div class="site-footer__brand">
           <p class="logo logo--footer">Sopki&nbsp;Retreat</p>
-          <p class="site-footer__note">ПЛЕЙСХОЛДЕР. Одна строка о проекте.</p>
+          <p class="site-footer__note">Оставьте заявку — ответим в течение дня и подберём номер под ваши даты</p>
         </div>
       </div>
 
       <div class="site-footer__bottom">
-        <p class="site-footer__copy">&copy; <span data-year>2026</span> Sopki Retreat. Вымышленный проект для портфолио.</p>
+        <p class="site-footer__copy">&copy; <span data-year>2026</span> Sopki Retreat</p>
         <a class="site-footer__top-link" href="#top">Наверх</a>
       </div>
     </div>

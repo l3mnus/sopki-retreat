@@ -131,6 +131,11 @@ a {
   text-decoration: none;
 }
 
+/* Атрибут hidden должен побеждать display из компонентных правил */
+[hidden] {
+  display: none !important;
+}
+
 address {
   font-style: normal;
 }
@@ -502,10 +507,16 @@ p {
 }
 
 .hero__tagline {
-  margin-bottom: var(--space-l);
+  margin-bottom: var(--space-xs);
   font-size: var(--step-1);
   color: var(--color-text-muted);
   max-width: 34ch;
+}
+
+.hero__subtitle {
+  margin-bottom: var(--space-l);
+  color: var(--color-text-muted);
+  max-width: 46ch;
 }
 
 /* --- 2. О ретрите --- */
@@ -538,6 +549,54 @@ p {
 .fact__label {
   font-size: var(--step--1);
   color: var(--color-text-muted);
+}
+
+/* Виджет вероятности сияния (данные NOAA SWPC, см. script.js) */
+
+.aurora-widget {
+  margin-top: var(--space-l);
+  padding: var(--space-m);
+  background-color: var(--color-surface);
+  border: var(--border-hairline);
+  border-radius: var(--radius-m);
+}
+
+.aurora-widget__title {
+  margin-bottom: var(--space-s);
+  font-family: var(--font-body);
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.aurora-widget__state {
+  color: var(--color-text-muted);
+}
+
+.aurora-widget__result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2xs) var(--space-s);
+}
+
+.aurora-widget__kp {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  line-height: 1;
+  color: var(--color-accent);
+}
+
+.aurora-widget__label {
+  color: var(--color-text-muted);
+}
+
+.aurora-widget__source {
+  margin-top: var(--space-s);
+  font-size: var(--step--1);
+  color: var(--color-text-faint);
 }
 
 @media (min-width: 48rem) {
@@ -592,7 +651,8 @@ p {
 
 /* --- 4. Демо-календарь --- */
 
-.booking__note {
+.booking__note,
+.rooms__note {
   margin-bottom: var(--space-l);
   color: var(--color-text-muted);
 }
@@ -725,7 +785,7 @@ p {
 
 @media (min-width: 48rem) {
   .services__list {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   }
 }
 
