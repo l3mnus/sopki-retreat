@@ -83,7 +83,7 @@
 
         <div class="about__grid">
           <div class="about__lead">
-            <p>Sopki Retreat — восемь номеров на дороге между Мурманском и Териберкой, там, где северная тайга уступает место лесотундре, а у самого берега — уже настоящей тундре.</p>
+            <p>Sopki Retreat — девять домиков на дороге между Мурманском и Териберкой, там, где северная тайга уступает место лесотундре, а у самого берега — уже настоящей тундре.</p>
             <p>Прямо на сайте мы показываем текущую вероятность сияния: смотрите прогноз и решайте сами, стоит ли сегодня выйти на улицу. А август и сентябрь здесь — время тихой охоты: грибы и ягоды в сопках, и первые ночи, когда небо снова начинает зеленеть.</p>
 
             <div class="aurora-widget" data-aurora>
@@ -99,7 +99,7 @@
 
           <ul class="about__facts">
             <li class="fact">
-              <span class="fact__value">8</span>
+              <span class="fact__value">9</span>
               <span class="fact__label">номеров</span>
             </li>
             <li class="fact">
@@ -120,7 +120,7 @@
       <div class="container">
         <p class="section__eyebrow">02 — Номера</p>
         <h2 class="section__title" id="rooms-title">Номера</h2>
-        <p class="rooms__note">Восемь номеров — северная простота снаружи, полный комфорт внутри</p>
+        <p class="rooms__note">Девять домиков трёх типов — северная простота снаружи, полный комфорт внутри</p>
 
         <ul class="rooms__list">
           <li class="room-card">
@@ -201,8 +201,49 @@
               <div><dt>Выезд</dt><dd data-booking-checkout>—</dd></div>
               <div><dt>Ночей</dt><dd data-booking-nights>—</dd></div>
             </dl>
-            <button class="btn btn--primary" type="button" data-booking-submit disabled>
-              Отправить заявку
+            <form class="booking__form" id="booking-form">
+              <div class="form-field">
+                <label for="booking-name">Имя <span class="required">*</span></label>
+                <input type="text" id="booking-name" name="name" autocomplete="name" required>
+                <p class="field-error" id="booking-name-error" aria-live="polite"></p>
+              </div>
+
+              <div class="form-field">
+                <label for="booking-cabin">Тип домика <span class="required">*</span></label>
+                <select id="booking-cabin" name="cabin" required>
+                  <option value="">Выберите тип</option>
+                  <option value="aurora-cabin">Aurora Cabin</option>
+                  <option value="fjeld-suite">Fjeld Suite</option>
+                  <option value="ember-room">Ember Room</option>
+                </select>
+                <p class="field-error" id="booking-cabin-error" aria-live="polite"></p>
+              </div>
+
+              <!-- Ловушка для ботов. Человек это поле не видит и не заполняет:
+                   оно убрано за пределы экрана в стилях. Робот заполняет все поля подряд,
+                   поэтому заполненная «компания» = признак спама. Не удалять. -->
+              <div class="form-trap" aria-hidden="true">
+                <label for="booking-company">Не заполняйте это поле</label>
+                <input type="text" id="booking-company" name="company" tabindex="-1" autocomplete="off">
+              </div>
+
+              <button class="btn btn--primary" type="submit" data-booking-submit>
+                Отправить заявку
+              </button>
+
+              <p class="form-error" id="booking-form-error" hidden>
+                Не удалось отправить заявку. Попробуйте ещё раз или напишите нам:
+                <a href="mailto:hello@sopki-retreat.ru">hello@sopki-retreat.ru</a>.
+              </p>
+            </form>
+
+            <div class="form-success" id="booking-success" hidden>
+              <h3>Заявка принята</h3>
+              <p>Это демонстрация: заявка никуда не отправлена и нигде не сохранена.</p>
+            </div>
+
+            <button class="btn btn--ghost booking__pay" type="button" data-modal-open="modal-sbp">
+              Оплатить через СБП
             </button>
             <p class="booking__disclaimer">Это демонстрационный календарь: даты и занятость показаны для примера, заявка на бронирование никуда не отправляется.</p>
           </aside>
@@ -296,6 +337,10 @@
               <p>Ближайший аэропорт — Мурманск (MMK), прямые рейсы из Москвы и Санкт-Петербурга.</p>
             </li>
             <li>
+              <h3 class="location__step-title">Поездом</h3>
+              <p>Прямые поезда из Москвы и Санкт-Петербурга до Мурманска, дальше — трансфер.</p>
+            </li>
+            <li>
               <h3 class="location__step-title">Трансфером</h3>
               <p>Встретим у трапа и довезём с комфортом, до 60 минут в пути.</p>
             </li>
@@ -344,6 +389,31 @@
       </div>
     </div>
   </footer>
+
+  <!-- Переиспользуемое модальное окно. Открывается любой кнопкой с
+       data-modal-open="<id>", закрывается кликом вне окна, кнопкой и Escape.
+       Тем же механизмом позже откроем фото номеров и услуг. -->
+  <div class="modal" id="modal-sbp" data-modal hidden>
+    <div class="modal__backdrop" data-modal-backdrop></div>
+
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-sbp-title">
+      <button class="modal__close" type="button" data-modal-close aria-label="Закрыть окно">
+        <span aria-hidden="true">&times;</span>
+      </button>
+
+      <h2 class="modal__title" id="modal-sbp-title">Оплата через СБП</h2>
+
+      <div class="modal__body">
+        <img class="modal__qr" src="assets/images/sbp-qr-placeholder.svg"
+             alt="Заглушка QR-кода для оплаты через СБП" width="220" height="220">
+        <p>
+          Демонстрационный режим. В реальном проекте здесь подключается платёжный шлюз
+          (ЮKassa, CloudPayments и&nbsp;т.&nbsp;п.), сайт не принимает и не хранит
+          платёжные данные.
+        </p>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js" defer></script>
 </body>

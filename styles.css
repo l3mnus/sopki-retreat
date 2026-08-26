@@ -1,7 +1,6 @@
 /* ==========================================================================
-   Sopki Retreat — базовые стили (скелет)
-   Порядок: шрифты → сброс → токены → база → утилиты → каркас блоков
-   Финальная палитра, типографическая шкала и оформление — отдельная задача.
+   Sopki Retreat — стили
+   Порядок: шрифты → сброс → токены → база → утилиты → блоки → модальное окно
    ========================================================================== */
 
 
@@ -65,7 +64,13 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
+}
+
+/* Плавная прокрутка только для тех, кто не просил уменьшить анимации */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -146,10 +151,6 @@ dd {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
   *,
   *::before,
   *::after {
@@ -163,9 +164,8 @@ dd {
 
 /* --------------------------------------------------------------------------
    3. ТОКЕНЫ
-   ВНИМАНИЕ: цвета ниже — временные нейтральные плейсхолдеры.
-   Финальную тёмную палитру подбираем отдельной задачей;
-   после подбора меняются только значения в этом блоке.
+   Палитра финальная. Производные оттенки помечены в комментариях;
+   контраст текста к фону проверен по WCAG AA.
    -------------------------------------------------------------------------- */
 
 :root {
@@ -762,6 +762,102 @@ p {
   color: var(--color-text-faint);
 }
 
+/* --- Форма заявки (отправка — заглушка, см. script.js) --- */
+
+.booking__form {
+  display: grid;
+  gap: var(--space-s);
+  margin-top: var(--space-m);
+}
+
+.form-field {
+  display: grid;
+  gap: var(--space-3xs);
+}
+
+.form-field label {
+  font-size: var(--step--1);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.required {
+  color: var(--color-cta);
+}
+
+.form-field input,
+.form-field select {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2xs) var(--space-xs);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border: var(--border-hairline);
+  border-radius: var(--radius-s);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.form-field input:hover,
+.form-field select:hover {
+  border-color: var(--color-text-faint);
+}
+
+.form-field input.has-error,
+.form-field select.has-error {
+  border-color: var(--color-cta);
+}
+
+.field-error:empty {
+  display: none;
+}
+
+.field-error {
+  font-size: var(--step--1);
+  color: var(--color-cta);
+}
+
+/* Ловушка для ботов: убрана за пределы экрана, но не display:none —
+   иначе часть роботов её игнорирует */
+.form-trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.booking__form .btn {
+  margin-top: var(--space-2xs);
+}
+
+.form-error {
+  font-size: var(--step--1);
+  color: var(--color-cta);
+}
+
+.form-success {
+  margin-top: var(--space-m);
+  padding: var(--space-m);
+  background-color: var(--color-bg);
+  border: var(--border-hairline);
+  border-radius: var(--radius-m);
+}
+
+.form-success h3 {
+  margin-bottom: var(--space-2xs);
+  font-size: var(--step-1);
+}
+
+.form-success p {
+  color: var(--color-text-muted);
+}
+
+.booking__pay {
+  width: 100%;
+  margin-top: var(--space-s);
+}
+
 @media (min-width: 56rem) {
   .booking__layout {
     grid-template-columns: 2fr 1fr;
@@ -914,4 +1010,100 @@ p {
   .site-footer__grid {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+
+/* --------------------------------------------------------------------------
+   7. МОДАЛЬНОЕ ОКНО — переиспользуемый компонент
+   Открывается любой кнопкой с data-modal-open="<id>". Логика в script.js.
+   -------------------------------------------------------------------------- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: grid;
+  place-items: center;
+  padding: var(--space-m);
+  padding-block-start: max(var(--space-m), env(safe-area-inset-top));
+  padding-block-end: max(var(--space-m), env(safe-area-inset-bottom));
+}
+
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(14, 21, 18, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+.modal__dialog {
+  position: relative;
+  width: min(28rem, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: var(--space-l);
+  background-color: var(--color-surface);
+  border: var(--border-hairline);
+  border-radius: var(--radius-l);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .modal__dialog {
+    animation: modal-in var(--duration-base) var(--ease-out);
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-s));
+  }
+}
+
+.modal__close {
+  position: absolute;
+  top: var(--space-2xs);
+  right: var(--space-2xs);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  font-size: var(--step-2);
+  line-height: 1;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-s);
+}
+
+.modal__close:hover {
+  color: var(--color-text);
+}
+
+.modal__title {
+  margin-bottom: var(--space-m);
+  padding-right: var(--space-l);
+  font-size: var(--step-2);
+}
+
+.modal__body {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-m);
+}
+
+.modal__body p {
+  font-size: var(--step--1);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.modal__qr {
+  width: 220px;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-s);
+}
+
+/* Блокировка прокрутки страницы, пока окно открыто */
+.has-modal-open {
+  overflow: hidden;
 }
