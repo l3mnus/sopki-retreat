@@ -100,7 +100,7 @@
           <ul class="about__facts">
             <li class="fact">
               <span class="fact__value">9</span>
-              <span class="fact__label">номеров</span>
+              <span class="fact__label">домиков</span>
             </li>
             <li class="fact">
               <span class="fact__value">Сентябрь – Апрель</span>
@@ -121,6 +121,7 @@
         <p class="section__eyebrow">02 — Номера</p>
         <h2 class="section__title" id="rooms-title">Номера</h2>
         <p class="rooms__note">Девять домиков трёх типов — северная простота снаружи, полный комфорт внутри</p>
+        <p class="rooms__count">По три домика каждого типа</p>
 
         <ul class="rooms__list">
           <li class="room-card">
@@ -130,8 +131,14 @@
             <div class="room-card__body">
               <h3 class="room-card__title">Aurora Cabin</h3>
               <p class="room-card__text">Отдельный домик с тёмной спальней и окном в потолке: сияние можно ловить лёжа</p>
-              <p class="room-card__price"><span class="visually-hidden">Цена: </span>24 000 ₽ / ночь</p>
-              <a class="btn btn--ghost" href="#booking">Выбрать даты</a>
+              <ul class="room-card__specs">
+                <li>45 м²</li>
+                <li>до 4 гостей</li>
+              </ul>
+              <div class="room-card__footer">
+                <p class="room-card__price"><span class="visually-hidden">Цена: </span>24 000 ₽ / ночь</p>
+                <a class="btn btn--ghost" href="#booking" data-room-select="aurora-cabin">Выбрать даты</a>
+              </div>
             </div>
           </li>
 
@@ -142,8 +149,14 @@
             <div class="room-card__body">
               <h3 class="room-card__title">Fjeld Suite</h3>
               <p class="room-card__text">Панорамный люкс с видом на сопки и собственной террасой</p>
-              <p class="room-card__price"><span class="visually-hidden">Цена: </span>19 000 ₽ / ночь</p>
-              <a class="btn btn--ghost" href="#booking">Выбрать даты</a>
+              <ul class="room-card__specs">
+                <li>38 м²</li>
+                <li>до 4 гостей</li>
+              </ul>
+              <div class="room-card__footer">
+                <p class="room-card__price"><span class="visually-hidden">Цена: </span>19 000 ₽ / ночь</p>
+                <a class="btn btn--ghost" href="#booking" data-room-select="fjeld-suite">Выбрать даты</a>
+              </div>
             </div>
           </li>
 
@@ -154,8 +167,14 @@
             <div class="room-card__body">
               <h3 class="room-card__title">Ember Room</h3>
               <p class="room-card__text">Камерный номер с камином, для тех, кто выбирает тепло вместо панорамы</p>
-              <p class="room-card__price"><span class="visually-hidden">Цена: </span>14 000 ₽ / ночь</p>
-              <a class="btn btn--ghost" href="#booking">Выбрать даты</a>
+              <ul class="room-card__specs">
+                <li>28 м²</li>
+                <li>до 2 гостей</li>
+              </ul>
+              <div class="room-card__footer">
+                <p class="room-card__price"><span class="visually-hidden">Цена: </span>14 000 ₽ / ночь</p>
+                <a class="btn btn--ghost" href="#booking" data-room-select="ember-room">Выбрать даты</a>
+              </div>
             </div>
           </li>
         </ul>
@@ -174,6 +193,15 @@
         <div class="booking__layout">
           <!-- Разметка-заготовка. Сетку дней и логику выбора дат добавит script.js отдельной задачей. -->
           <div class="calendar" data-calendar>
+            <div class="calendar__cabins">
+              <label for="calendar-cabin">Тип домика</label>
+              <select id="calendar-cabin" data-calendar-cabin>
+                <option value="aurora-cabin">Aurora Cabin</option>
+                <option value="fjeld-suite">Fjeld Suite</option>
+                <option value="ember-room">Ember Room</option>
+              </select>
+            </div>
+
             <div class="calendar__header">
               <button class="calendar__nav" type="button" data-calendar-prev aria-label="Предыдущий месяц">&larr;</button>
               <h3 class="calendar__month" data-calendar-month aria-live="polite">ПЛЕЙСХОЛДЕР — месяц, год</h3>
@@ -184,22 +212,30 @@
               <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
             </div>
 
-            <div class="calendar__grid" data-calendar-grid role="grid" aria-label="Календарь доступных дат">
+            <div class="calendar__grid" data-calendar-grid role="group" aria-label="Календарь доступных дат">
               <!-- Дни генерируются в script.js -->
             </div>
+
+            <p class="calendar__message" data-calendar-message role="status" aria-live="polite" hidden></p>
 
             <ul class="calendar__legend">
               <li><span class="legend-dot legend-dot--free" aria-hidden="true"></span>Свободно</li>
               <li><span class="legend-dot legend-dot--busy" aria-hidden="true"></span>Занято</li>
               <li><span class="legend-dot legend-dot--selected" aria-hidden="true"></span>Ваш выбор</li>
             </ul>
+
+            <p class="calendar__legend-note">Число под датой — цена за ночь, ₽</p>
           </div>
 
           <aside class="booking__summary" aria-label="Параметры брони">
+            <p class="booking__hint" data-booking-hint>Выберите даты заезда и выезда</p>
+
             <dl class="booking__summary-list">
+              <div><dt>Тип домика</dt><dd data-booking-cabin>Aurora Cabin</dd></div>
               <div><dt>Заезд</dt><dd data-booking-checkin>—</dd></div>
               <div><dt>Выезд</dt><dd data-booking-checkout>—</dd></div>
               <div><dt>Ночей</dt><dd data-booking-nights>—</dd></div>
+              <div class="booking__total"><dt>Итого</dt><dd data-booking-total>—</dd></div>
             </dl>
             <form class="booking__form" id="booking-form">
               <div class="form-field">
@@ -209,14 +245,51 @@
               </div>
 
               <div class="form-field">
-                <label for="booking-cabin">Тип домика <span class="required">*</span></label>
-                <select id="booking-cabin" name="cabin" required>
-                  <option value="">Выберите тип</option>
-                  <option value="aurora-cabin">Aurora Cabin</option>
-                  <option value="fjeld-suite">Fjeld Suite</option>
-                  <option value="ember-room">Ember Room</option>
-                </select>
-                <p class="field-error" id="booking-cabin-error" aria-live="polite"></p>
+                <label for="booking-phone">Телефон <span class="required">*</span></label>
+                <input type="tel" id="booking-phone" name="phone" placeholder="+7 (___) ___-__-__"
+                  autocomplete="tel" required>
+                <p class="field-error" id="booking-phone-error" aria-live="polite"></p>
+              </div>
+
+              <!-- Тип домика выбирается только в календаре. Здесь он показан
+                   строкой, а уезжает с заявкой в скрытом поле. -->
+              <div class="form-field form-field--readout">
+                <span class="form-field__label">Тип домика</span>
+                <span class="form-field__value" data-form-cabin>Aurora Cabin</span>
+                <input type="hidden" id="booking-cabin" name="cabin" value="aurora-cabin">
+              </div>
+
+              <div class="form-field form-field--stepper">
+                <label for="booking-guests">Гостей <span class="required">*</span></label>
+
+                <div class="stepper" data-stepper>
+                  <button class="stepper__btn" type="button" data-stepper-dec
+                    aria-label="Убрать одного гостя"><span aria-hidden="true">&minus;</span></button>
+                  <input class="stepper__value" type="number" id="booking-guests" name="guests"
+                    value="2" min="1" max="4" step="1" inputmode="numeric" required>
+                  <button class="stepper__btn" type="button" data-stepper-inc
+                    aria-label="Добавить гостя"><span aria-hidden="true">+</span></button>
+                </div>
+
+                <p class="field-hint" id="booking-guests-hint" aria-live="polite"></p>
+                <p class="field-error" id="booking-guests-error" aria-live="polite"></p>
+              </div>
+
+              <div class="form-field form-field--stepper">
+                <label for="booking-children">Детей до 5 лет</label>
+
+                <div class="stepper" data-stepper>
+                  <button class="stepper__btn" type="button" data-stepper-dec
+                    aria-label="Убрать одного ребёнка"><span aria-hidden="true">&minus;</span></button>
+                  <input class="stepper__value" type="number" id="booking-children" name="children"
+                    value="0" min="0" max="1" step="1" inputmode="numeric">
+                  <button class="stepper__btn" type="button" data-stepper-inc
+                    aria-label="Добавить ребёнка"><span aria-hidden="true">+</span></button>
+                </div>
+
+                <p class="field-note">Считаются внутри общего числа гостей</p>
+                <p class="field-hint" id="booking-children-hint" aria-live="polite"></p>
+                <p class="field-error" id="booking-children-error" aria-live="polite"></p>
               </div>
 
               <!-- Ловушка для ботов. Человек это поле не видит и не заполняет:

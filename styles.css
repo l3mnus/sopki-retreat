@@ -607,6 +607,17 @@ p {
 
 /* --- 3. Номера --- */
 
+.rooms__note {
+  margin-bottom: var(--space-3xs);
+  color: var(--color-text-muted);
+}
+
+.rooms__count {
+  margin-bottom: var(--space-l);
+  font-size: var(--step--1);
+  color: var(--color-text-faint);
+}
+
 .rooms__list,
 .services__list,
 .gallery__grid {
@@ -614,11 +625,21 @@ p {
   gap: var(--space-l);
 }
 
+/* Карточка тянется на всю высоту ячейки сетки, а цена с кнопкой прижаты
+   к низу — тогда кнопки стоят в один ряд при описаниях разной длины */
 .room-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   background-color: var(--color-surface);
   border: var(--border-hairline);
   border-radius: var(--radius-m);
   overflow: hidden;
+}
+
+/* Картинка не должна сжиматься, когда текста в соседней карточке больше */
+.room-card__media {
+  flex-shrink: 0;
 }
 
 .room-card__media img {
@@ -628,14 +649,38 @@ p {
 }
 
 .room-card__body {
-  display: grid;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
   gap: var(--space-xs);
-  justify-items: start;
   padding: var(--space-m);
+}
+
+.room-card__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  margin-top: auto;
 }
 
 .room-card__text {
   color: var(--color-text-muted);
+}
+
+.room-card__specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-s);
+  font-size: var(--step--1);
+  color: var(--color-text-faint);
+}
+
+/* Точка-разделитель между характеристиками, но не перед первой */
+.room-card__specs > li + li::before {
+  content: '·';
+  margin-right: var(--space-2xs);
 }
 
 .room-card__price {
@@ -651,8 +696,7 @@ p {
 
 /* --- 4. Демо-календарь --- */
 
-.booking__note,
-.rooms__note {
+.booking__note {
   margin-bottom: var(--space-l);
   color: var(--color-text-muted);
 }
@@ -667,6 +711,31 @@ p {
   background-color: var(--color-surface);
   border: var(--border-hairline);
   border-radius: var(--radius-m);
+}
+
+.calendar__cabins {
+  display: grid;
+  gap: var(--space-3xs);
+  margin-bottom: var(--space-m);
+  padding-bottom: var(--space-m);
+  border-bottom: var(--border-hairline);
+}
+
+.calendar__cabins label {
+  font-size: var(--step--1);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.calendar__cabins select {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2xs) var(--space-xs);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border: var(--border-hairline);
+  border-radius: var(--radius-s);
 }
 
 .calendar__header {
@@ -684,8 +753,13 @@ p {
   color: var(--color-text-muted);
 }
 
-.calendar__nav:hover {
+.calendar__nav:hover:not(:disabled) {
   color: var(--color-text);
+}
+
+.calendar__nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .calendar__month {
@@ -706,8 +780,87 @@ p {
   color: var(--color-text-faint);
 }
 
-.calendar__grid {
-  min-height: 15rem;                      /* держит высоту до отрисовки дней */
+/* --- Ячейки дней ---
+   Состояние передаётся не только цветом: у выбранных дат своя рамка и жирное
+   начертание, у занятых — зачёркнутое число, у прошедших — приглушённость.
+   То же самое дублируется в aria-label каждой кнопки. */
+
+.calendar__day {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 1px;
+  aspect-ratio: 1;
+  padding: 1px;
+  background-color: var(--color-day-free);
+  color: var(--color-text);
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  font-size: var(--step--1);
+  line-height: 1.1;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.calendar__day-number {
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar__day-price {
+  font-size: 0.625rem;
+  color: var(--color-text-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.calendar__day:hover:not([aria-disabled="true"]) {
+  border-color: var(--color-accent);
+}
+
+.calendar__day.is-past {
+  background-color: transparent;
+  color: var(--color-text-faint);
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.calendar__day.is-busy {
+  background-color: var(--color-day-busy);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.calendar__day.is-busy .calendar__day-number {
+  text-decoration: line-through;
+}
+
+.calendar__day.is-start,
+.calendar__day.is-end {
+  background-color: var(--color-day-selected);
+  border-color: var(--color-accent-hover);
+  border-width: 2px;
+  color: var(--color-on-accent);
+  font-weight: 700;
+}
+
+.calendar__day.is-start .calendar__day-price,
+.calendar__day.is-end .calendar__day-price {
+  color: var(--color-on-accent);
+}
+
+.calendar__day.is-in-range {
+  background-color: color-mix(in srgb, var(--color-accent) 22%, var(--color-surface));
+  border-color: var(--color-accent);
+}
+
+.calendar__blank {
+  aspect-ratio: 1;
+}
+
+.calendar__message {
+  margin-top: var(--space-s);
+  font-size: var(--step--1);
+  color: var(--color-cta);
 }
 
 .calendar__legend {
@@ -726,6 +879,12 @@ p {
   margin-right: var(--space-3xs);
   border-radius: 50%;
   vertical-align: baseline;
+}
+
+.calendar__legend-note {
+  margin-top: var(--space-2xs);
+  font-size: var(--step--1);
+  color: var(--color-text-faint);
 }
 
 .legend-dot--free     { background-color: var(--color-day-free); border: var(--border-hairline); }
@@ -749,6 +908,30 @@ p {
 
 .booking__summary-list dt {
   color: var(--color-text-muted);
+}
+
+.booking__summary-list dd {
+  text-align: right;
+}
+
+.booking__hint {
+  margin-bottom: var(--space-s);
+  font-size: var(--step--1);
+  color: var(--color-text-faint);
+}
+
+.booking__total {
+  border-bottom: none;
+}
+
+.booking__total dt,
+.booking__total dd {
+  font-size: var(--step-1);
+  color: var(--color-text);
+}
+
+.booking__total dd {
+  font-family: var(--font-display);
 }
 
 .booking__summary .btn {
@@ -775,7 +958,8 @@ p {
   gap: var(--space-3xs);
 }
 
-.form-field label {
+.form-field label,
+.form-field__label {
   font-size: var(--step--1);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
@@ -808,13 +992,122 @@ p {
   border-color: var(--color-cta);
 }
 
-.field-error:empty {
+.field-error:empty,
+.field-hint:empty {
   display: none;
+}
+
+/* Подсказка о том, что значение поправили автоматически */
+.field-hint {
+  font-size: var(--step--1);
+  color: var(--color-accent);
+}
+
+/* Постоянное пояснение к полю */
+.field-note {
+  font-size: var(--step--1);
+  color: var(--color-text-faint);
 }
 
 .field-error {
   font-size: var(--step--1);
   color: var(--color-cta);
+}
+
+/* --- Строка-вывод: значение выбрано в другом месте, здесь только показано --- */
+
+.form-field--readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2xs) var(--space-s);
+  padding-bottom: var(--space-2xs);
+  border-bottom: var(--border-hairline);
+}
+
+.form-field__value {
+  color: var(--color-text);
+}
+
+/* --- Счётчик гостей и детей ---
+   Кнопки настоящие, с aria-label; поле внутри остаётся полем ввода,
+   чтобы значение можно было набрать с клавиатуры. */
+
+.form-field--stepper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2xs) var(--space-s);
+}
+
+/* Сообщения под счётчиком всегда занимают свою строку */
+.form-field--stepper .field-hint,
+.form-field--stepper .field-note,
+.form-field--stepper .field-error {
+  flex: 1 0 100%;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-bg);
+  border: var(--border-hairline);
+  border-radius: 999px;
+}
+
+.stepper__btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--color-text-muted);
+  font-size: var(--step-1);
+  line-height: 1;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.stepper__btn:hover:not(:disabled) {
+  background-color: var(--color-surface-raised);
+  color: var(--color-accent);
+}
+
+.stepper__btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Перебиваем общее правило .form-field input */
+.form-field .stepper__value {
+  width: 3ch;
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--color-text);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.form-field .stepper__value:hover {
+  border-color: transparent;
+}
+
+/* Родные стрелки браузера убираем: свои кнопки уже есть */
+.stepper__value::-webkit-outer-spin-button,
+.stepper__value::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stepper:focus-within {
+  border-color: var(--color-accent);
 }
 
 /* Ловушка для ботов: убрана за пределы экрана, но не display:none —
