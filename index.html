@@ -15,7 +15,7 @@
   <meta property="og:site_name" content="Sopki Retreat">
   <meta property="og:title" content="Sopki Retreat">
   <meta property="og:description" content="Камерный ретрит на дороге между Мурманском и Териберкой — там, где сопки выходят к океану">
-  <meta property="og:image" content="assets/images/og-cover.webp">
+  <meta property="og:image" content="assets/images/hero-poster.webp">
 
   <!-- Иконки — файлы появятся позже
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -59,11 +59,10 @@
 
     <!-- 1. HERO -->
     <section class="hero" id="hero" aria-labelledby="hero-title">
-      <video class="hero__video" autoplay muted loop playsinline preload="metadata"
-             poster="assets/images/hero-poster.webp" aria-hidden="true" tabindex="-1">
-        <source src="assets/video/hero.webm" type="video/webm">
-        <source src="assets/video/hero.mp4" type="video/mp4">
-      </video>
+      <video class="hero__video" data-hero-video
+             autoplay muted loop playsinline preload="metadata"
+             poster="assets/images/hero-poster.webp" src="assets/video/hero.mp4"
+             aria-hidden="true" tabindex="-1"></video>
       <div class="hero__scrim" aria-hidden="true"></div>
 
       <div class="container hero__content">
@@ -126,11 +125,19 @@
         <ul class="rooms__list">
           <li class="room-card">
             <figure class="room-card__media">
-              <img src="assets/images/room-1.webp" alt="Тёмная спальня с окном в потолке в номере Aurora Cabin" width="800" height="600" loading="lazy" decoding="async">
+              <button class="room-card__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="aurora-cabin" data-gallery-index="0"
+                aria-label="Открыть галерею номера «Сияние»">
+                <img src="assets/images/aurora-cabin-2.webp" alt="Тёмная спальня с тёплой подсветкой и реечной перегородкой"
+                  width="1200" height="1800" loading="lazy" decoding="async" data-gallery="aurora-cabin">
+              </button>
             </figure>
             <div class="room-card__body">
-              <h3 class="room-card__title">Aurora Cabin</h3>
-              <p class="room-card__text">Отдельный домик с тёмной спальней и окном в потолке: сияние можно ловить лёжа</p>
+              <h3 class="room-card__title">
+                <button class="room-card__title-btn" type="button"
+                  data-modal-open="modal-lightbox" data-gallery-open="aurora-cabin" data-gallery-index="0">Сияние</button>
+              </h3>
+              <p class="room-card__text">Отдельный домик с тёмной спальней и панорамным окном: сияние видно, не вставая с кровати</p>
               <ul class="room-card__specs">
                 <li>45 м²</li>
                 <li>до 4 гостей</li>
@@ -144,11 +151,19 @@
 
           <li class="room-card">
             <figure class="room-card__media">
-              <img src="assets/images/room-2.webp" alt="Панорамные окна и терраса номера Fjeld Suite с видом на сопки" width="800" height="600" loading="lazy" decoding="async">
+              <button class="room-card__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="fjeld-suite" data-gallery-index="0"
+                aria-label="Открыть галерею номера «Панорама»">
+                <img src="assets/images/fjeld-suite-4.webp" alt="Окно во всю стену с видом на скалистый хребет"
+                  width="1200" height="1800" loading="lazy" decoding="async" data-gallery="fjeld-suite">
+              </button>
             </figure>
             <div class="room-card__body">
-              <h3 class="room-card__title">Fjeld Suite</h3>
-              <p class="room-card__text">Панорамный люкс с видом на сопки и собственной террасой</p>
+              <h3 class="room-card__title">
+                <button class="room-card__title-btn" type="button"
+                  data-modal-open="modal-lightbox" data-gallery-open="fjeld-suite" data-gallery-index="0">Панорама</button>
+              </h3>
+              <p class="room-card__text">Панорамный люкс с окном во всю стену и собственной террасой</p>
               <ul class="room-card__specs">
                 <li>38 м²</li>
                 <li>до 4 гостей</li>
@@ -162,11 +177,19 @@
 
           <li class="room-card">
             <figure class="room-card__media">
-              <img src="assets/images/room-3.webp" alt="Камин и тёплый интерьер номера Ember Room" width="800" height="600" loading="lazy" decoding="async">
+              <button class="room-card__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="ember-room" data-gallery-index="0"
+                aria-label="Открыть галерею номера «Очаг»">
+                <img src="assets/images/ember-room-3.webp" alt="Камин с дровами у каменной стены"
+                  width="1200" height="1800" loading="lazy" decoding="async" data-gallery="ember-room">
+              </button>
             </figure>
             <div class="room-card__body">
-              <h3 class="room-card__title">Ember Room</h3>
-              <p class="room-card__text">Камерный номер с камином, для тех, кто выбирает тепло вместо панорамы</p>
+              <h3 class="room-card__title">
+                <button class="room-card__title-btn" type="button"
+                  data-modal-open="modal-lightbox" data-gallery-open="ember-room" data-gallery-index="0">Очаг</button>
+              </h3>
+              <p class="room-card__text">Камерный номер с камином и глубокой ванной, для тех, кто выбирает тепло вместо панорамы</p>
               <ul class="room-card__specs">
                 <li>28 м²</li>
                 <li>до 2 гостей</li>
@@ -196,9 +219,9 @@
             <div class="calendar__cabins">
               <label for="calendar-cabin">Тип домика</label>
               <select id="calendar-cabin" data-calendar-cabin>
-                <option value="aurora-cabin">Aurora Cabin</option>
-                <option value="fjeld-suite">Fjeld Suite</option>
-                <option value="ember-room">Ember Room</option>
+                <option value="aurora-cabin">Сияние</option>
+                <option value="fjeld-suite">Панорама</option>
+                <option value="ember-room">Очаг</option>
               </select>
             </div>
 
@@ -231,7 +254,7 @@
             <p class="booking__hint" data-booking-hint>Выберите даты заезда и выезда</p>
 
             <dl class="booking__summary-list">
-              <div><dt>Тип домика</dt><dd data-booking-cabin>Aurora Cabin</dd></div>
+              <div><dt>Тип домика</dt><dd data-booking-cabin>Сияние</dd></div>
               <div><dt>Заезд</dt><dd data-booking-checkin>—</dd></div>
               <div><dt>Выезд</dt><dd data-booking-checkout>—</dd></div>
               <div><dt>Ночей</dt><dd data-booking-nights>—</dd></div>
@@ -255,7 +278,7 @@
                    строкой, а уезжает с заявкой в скрытом поле. -->
               <div class="form-field form-field--readout">
                 <span class="form-field__label">Тип домика</span>
-                <span class="form-field__value" data-form-cabin>Aurora Cabin</span>
+                <span class="form-field__value" data-form-cabin>Сияние</span>
                 <input type="hidden" id="booking-cabin" name="cabin" value="aurora-cabin">
               </div>
 
@@ -332,18 +355,50 @@
 
         <ul class="services__list">
           <li class="service-card">
+            <figure class="service-card__media">
+              <button class="service-card__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="service-banya" data-gallery-index="0"
+                aria-label="Открыть фото: Баня и спа">
+                <img src="assets/images/service-banya.webp" alt="Баня-бочка из дерева в вечернем свете"
+                  width="1200" height="1800" loading="lazy" decoding="async" data-gallery="service-banya">
+              </button>
+            </figure>
             <h3 class="service-card__title">Баня и спа</h3>
             <p class="service-card__text">Баня на дровах и купель под открытым небом, после — травяной чай у камина</p>
           </li>
           <li class="service-card">
+            <figure class="service-card__media">
+              <button class="service-card__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="service-routes" data-gallery-index="0"
+                aria-label="Открыть фото: Маршруты по Кольскому">
+                <img src="assets/images/service-routes.webp" alt="Остов старого судна на берегу залива"
+                  width="1200" height="806" loading="lazy" decoding="async" data-gallery="service-routes">
+              </button>
+            </figure>
             <h3 class="service-card__title">Маршруты по Кольскому</h3>
             <p class="service-card__text">Авторские туры с местным гидом: Териберка, заброшенные посёлки, побережье Баренцева моря</p>
           </li>
           <li class="service-card">
+            <figure class="service-card__media">
+              <button class="service-card__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="service-snowmobile" data-gallery-index="0"
+                aria-label="Открыть фото: Снегоходы и квадроциклы">
+                <img src="assets/images/gallery-snowmobile.webp" alt="Снегоход в движении по заснеженной колее"
+                  width="1600" height="1067" loading="lazy" decoding="async" data-gallery="service-snowmobile">
+              </button>
+            </figure>
             <h3 class="service-card__title">Снегоходы и квадроциклы</h3>
             <p class="service-card__text">Зимой снегоходы, летом квадроциклы и хайкинг, маршруты по сопкам с гидом</p>
           </li>
           <li class="service-card">
+            <figure class="service-card__media">
+              <button class="service-card__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="service-transfer" data-gallery-index="0"
+                aria-label="Открыть фото: Трансфер из аэропорта">
+                <img src="assets/images/service-transfer.webp" alt="Заснеженная дорога среди гор"
+                  width="1200" height="675" loading="lazy" decoding="async" data-gallery="service-transfer">
+              </button>
+            </figure>
             <h3 class="service-card__title">Трансфер из аэропорта</h3>
             <p class="service-card__text">Забираем из Мурманска, дорога — часть впечатления, не пересадка</p>
           </li>
@@ -360,32 +415,62 @@
         <ul class="gallery__grid">
           <li class="gallery__item">
             <figure>
-              <img src="assets/images/gallery-1.webp" alt="Сопки Кольского полуострова на закате" width="900" height="600" loading="lazy" decoding="async">
+              <button class="gallery__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="gallery" data-gallery-index="0"
+                aria-label="Открыть фото: Северное сияние над зимним лесом">
+                <img src="assets/images/gallery-aurora.webp" alt="Северное сияние над зимним лесом"
+                  width="1600" height="900" loading="lazy" decoding="async" data-gallery="gallery">
+              </button>
             </figure>
           </li>
           <li class="gallery__item">
             <figure>
-              <img src="assets/images/gallery-2.webp" alt="Северное сияние над тундрой" width="900" height="600" loading="lazy" decoding="async">
+              <button class="gallery__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="gallery" data-gallery-index="1"
+                aria-label="Открыть фото: Заснеженные сопки над водой на розовом закате">
+                <img src="assets/images/gallery-sea.webp" alt="Заснеженные сопки над водой на розовом закате"
+                  width="1600" height="1068" loading="lazy" decoding="async" data-gallery="gallery">
+              </button>
             </figure>
           </li>
           <li class="gallery__item">
             <figure>
-              <img src="assets/images/gallery-3.webp" alt="Баня на дровах с видом на лес" width="900" height="600" loading="lazy" decoding="async">
+              <button class="gallery__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="gallery" data-gallery-index="2"
+                aria-label="Открыть фото: Закат в распадке между заснеженными сопками">
+                <img src="assets/images/gallery-sunset.webp" alt="Закат в распадке между заснеженными сопками"
+                  width="1600" height="1067" loading="lazy" decoding="async" data-gallery="gallery">
+              </button>
             </figure>
           </li>
           <li class="gallery__item">
             <figure>
-              <img src="assets/images/gallery-4.webp" alt="Снегоход на фоне заснеженных сопок" width="900" height="600" loading="lazy" decoding="async">
+              <button class="gallery__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="gallery" data-gallery-index="3"
+                aria-label="Открыть фото: Побережье Баренцева моря зимой">
+                <img src="assets/images/gallery-coast.webp" alt="Побережье Баренцева моря зимой"
+                  width="1600" height="900" loading="lazy" decoding="async" data-gallery="gallery">
+              </button>
             </figure>
           </li>
           <li class="gallery__item">
             <figure>
-              <img src="assets/images/gallery-5.webp" alt="Тёплый интерьер номера с камином" width="900" height="600" loading="lazy" decoding="async">
+              <button class="gallery__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="gallery" data-gallery-index="4"
+                aria-label="Открыть фото: Заснеженная дорога в тумане">
+                <img src="assets/images/service-transfer-alt.webp" alt="Заснеженная дорога в тумане"
+                  width="1200" height="800" loading="lazy" decoding="async" data-gallery="gallery">
+              </button>
             </figure>
           </li>
           <li class="gallery__item">
             <figure>
-              <img src="assets/images/gallery-6.webp" alt="Каменистый берег Баренцева моря у Териберки" width="900" height="600" loading="lazy" decoding="async">
+              <button class="gallery__photo" type="button"
+                data-modal-open="modal-lightbox" data-gallery-open="gallery" data-gallery-index="5"
+                aria-label="Открыть фото: Баня-бочка в хвойном лесу">
+                <img src="assets/images/gallery-banya.webp" alt="Баня-бочка в хвойном лесу"
+                  width="1600" height="2844" loading="lazy" decoding="async" data-gallery="gallery">
+              </button>
             </figure>
           </li>
         </ul>
@@ -478,13 +563,43 @@
 
       <div class="modal__body">
         <img class="modal__qr" src="assets/images/sbp-qr-placeholder.svg"
-             alt="Заглушка QR-кода для оплаты через СБП" width="220" height="220">
+             alt="Заглушка QR-кода для оплаты через СБП" width="220" height="220" loading="lazy">
         <p>
           Демонстрационный режим. В реальном проекте здесь подключается платёжный шлюз
           (ЮKassa, CloudPayments и&nbsp;т.&nbsp;п.), сайт не принимает и не хранит
           платёжные данные.
         </p>
       </div>
+    </div>
+  </div>
+
+  <!-- Лайтбокс. Содержимое подставляет script.js, механизм окна — общий. -->
+  <div class="modal modal--lightbox" id="modal-lightbox" data-modal hidden>
+    <div class="modal__backdrop" data-modal-backdrop></div>
+
+    <div class="modal__dialog modal__dialog--lightbox" role="dialog" aria-modal="true"
+         aria-labelledby="lightbox-title">
+      <button class="modal__close" type="button" data-modal-close aria-label="Закрыть просмотр">
+        <span aria-hidden="true">&times;</span>
+      </button>
+
+      <h2 class="visually-hidden" id="lightbox-title">Просмотр фотографий</h2>
+
+      <figure class="lightbox">
+        <div class="lightbox__stage" data-lightbox-stage>
+          <img class="lightbox__image" data-lightbox-image src="" alt="" decoding="async">
+        </div>
+
+        <figcaption class="lightbox__bar">
+          <button class="lightbox__nav" type="button" data-lightbox-prev aria-label="Предыдущее фото">
+            <span aria-hidden="true">&larr;</span>
+          </button>
+          <span class="lightbox__counter" data-lightbox-counter aria-live="polite"></span>
+          <button class="lightbox__nav" type="button" data-lightbox-next aria-label="Следующее фото">
+            <span aria-hidden="true">&rarr;</span>
+          </button>
+        </figcaption>
+      </figure>
     </div>
   </div>
 

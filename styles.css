@@ -642,10 +642,45 @@ p {
   flex-shrink: 0;
 }
 
+/* Фото номеров вертикальные — карточка под них, а не под 4:3 */
 .room-card__media img {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 4;
   object-fit: cover;
+}
+
+.room-card__photo,
+.service-card__photo,
+.gallery__photo {
+  display: block;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.room-card__photo img,
+.service-card__photo img,
+.gallery__photo img {
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.room-card__photo:hover img,
+.service-card__photo:hover img,
+.gallery__photo:hover img {
+  transform: scale(1.03);
+}
+
+.room-card__title-btn {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.room-card__title-btn:hover {
+  color: var(--color-accent);
 }
 
 .room-card__body {
@@ -1164,6 +1199,18 @@ p {
   border-top: var(--border-hairline);
 }
 
+.service-card__media {
+  margin-bottom: var(--space-s);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+}
+
+.service-card__media img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
 .service-card__title {
   margin-bottom: var(--space-2xs);
 }
@@ -1399,4 +1446,78 @@ p {
 /* Блокировка прокрутки страницы, пока окно открыто */
 .has-modal-open {
   overflow: hidden;
+}
+
+
+/* --------------------------------------------------------------------------
+   8. ЛАЙТБОКС — содержимое окна modal-lightbox
+   Снимок показывается целиком, без обрезки: пропорции у фото разные.
+   -------------------------------------------------------------------------- */
+
+.modal__dialog--lightbox {
+  width: min(64rem, 100%);
+  max-height: 100%;
+  padding: var(--space-m);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+
+.lightbox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  min-height: 0;                          /* иначе flex не даёт сцене сжаться */
+}
+
+.lightbox__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  touch-action: pan-y;                    /* горизонтальный жест остаётся нам */
+}
+
+.lightbox__image {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--radius-s);
+}
+
+.lightbox__bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-m);
+}
+
+.lightbox__nav {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: var(--border-hairline);
+  border-radius: 50%;
+  color: var(--color-text-muted);
+  font-size: var(--step-1);
+  line-height: 1;
+  transition: border-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.lightbox__nav:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.lightbox__counter {
+  min-width: 4ch;
+  text-align: center;
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-faint);
 }

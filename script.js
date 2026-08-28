@@ -10,6 +10,54 @@
 'use strict';
 
 
+/* Скорость фонового видео на первом экране: 1 — как снято, меньше — медленнее.
+   Значение подбирается на глаз, менять здесь. */
+var HERO_PLAYBACK_RATE = 0.6;
+
+
+/* --------------------------------------------------------------------------
+   Фоновое видео первого экрана
+
+   Автозапуск обеспечивают атрибуты muted, playsinline, loop и autoplay
+   в разметке — без JavaScript видео тоже играет. Скрипт только замедляет
+   воспроизведение и выключает его тем, кто просил меньше движения:
+   у видео снимается источник, и браузер показывает постер.
+   -------------------------------------------------------------------------- */
+
+(function initHeroVideo() {
+  var video = document.querySelector('[data-hero-video]');
+  if (!video) return;
+
+  var query = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function showPosterOnly() {
+    video.pause();
+    video.removeAttribute('autoplay');
+    video.removeAttribute('src');
+    video.load();
+  }
+
+  // Часть браузеров сбрасывает скорость при загрузке источника, поэтому
+  // выставляем её и на события, а не только один раз
+  function applyRate() {
+    try {
+      video.playbackRate = HERO_PLAYBACK_RATE;
+    } catch (error) {
+      /* старый браузер не даёт менять скорость — не страшно */
+    }
+  }
+
+  if (query.matches) {
+    showPosterOnly();
+    return;
+  }
+
+  applyRate();
+  video.addEventListener('loadedmetadata', applyRate);
+  video.addEventListener('play', applyRate);
+})();
+
+
 /* --------------------------------------------------------------------------
    Виджет вероятности сияния
 
@@ -215,9 +263,9 @@ var modals = (function () {
    -------------------------------------------------------------------------- */
 
 var CABINS = {
-  'aurora-cabin': { name: 'Aurora Cabin', base: 24000, capacity: 4 },
-  'fjeld-suite': { name: 'Fjeld Suite', base: 19000, capacity: 4 },
-  'ember-room': { name: 'Ember Room', base: 14000, capacity: 2 }
+  'aurora-cabin': { name: 'Сияние', base: 24000, capacity: 4 },
+  'fjeld-suite': { name: 'Панорама', base: 19000, capacity: 4 },
+  'ember-room': { name: 'Очаг', base: 14000, capacity: 2 }
 };
 
 
@@ -697,6 +745,145 @@ var CABINS = {
 
 
 /* --------------------------------------------------------------------------
+   Лайтбокс
+
+   Само окно — общий компонент modals: разметка [data-modal] лежит в конце
+   страницы, открытие и закрытие, Escape, клик вне и возврат фокуса уже
+   работают там. Здесь только подбор снимков и перелистывание.
+
+   Набор собирается из разметки: все img[data-gallery="<группа>"] в порядке
+   следования. У номеров в карточке показан лишь первый снимок, остальные
+   перечислены в EXTRA_PHOTOS и дописываются в конец набора.
+
+   Открывает любой элемент с data-gallery-open="<группа>" (и, если нужно,
+   data-gallery-index). Слушатель работает на фазе перехвата, чтобы снимок
+   подставился раньше, чем окно покажется.
+   -------------------------------------------------------------------------- */
+
+(function initLightbox() {
+  var SWIPE_THRESHOLD = 40; // px, короче — считаем случайным касанием
+
+  var modal = document.getElementById('modal-lightbox');
+  if (!modal) return;
+
+  var imageEl = modal.querySelector('[data-lightbox-image]');
+  var stageEl = modal.querySelector('[data-lightbox-stage]');
+  var counterEl = modal.querySelector('[data-lightbox-counter]');
+  var barEl = modal.querySelector('.lightbox__bar');
+  var prevBtn = modal.querySelector('[data-lightbox-prev]');
+  var nextBtn = modal.querySelector('[data-lightbox-next]');
+  if (!imageEl || !stageEl || !counterEl || !barEl || !prevBtn || !nextBtn) return;
+
+  // Первый снимок каждого номера лежит в разметке карточки — это обложка.
+  // Здесь перечислено то, что показывается дальше по порядку.
+  var EXTRA_PHOTOS = {
+    'aurora-cabin': [
+      { src: 'assets/images/aurora-cabin-1.webp', width: 1200, height: 1600,
+        alt: 'Спальня с панорамным окном на заснеженную ель' },
+      { src: 'assets/images/aurora-cabin-3.webp', width: 1600, height: 2400,
+        alt: 'Спальня с тёмно-зелёными стенами и наклонным окном' },
+      { src: 'assets/images/aurora-cabin-4.webp', width: 1200, height: 800,
+        alt: 'Домик «Сияние» зимним вечером, тёплый свет из дверей' }
+    ],
+    'fjeld-suite': [
+      { src: 'assets/images/fjeld-suite-1.webp', width: 1200, height: 1800,
+        alt: 'Светлая гостиная с угловым диваном и видом на лес' },
+      { src: 'assets/images/fjeld-suite-2.webp', width: 1200, height: 800,
+        alt: 'Вид с террасы на заснеженные ели и горный хребет' },
+      { src: 'assets/images/fjeld-suite-3.webp', width: 1200, height: 800,
+        alt: 'Зона отдыха с креслом, овчиной и большим окном' }
+    ],
+    // ember-room-2 из показа убран: кадр не подходит номеру
+    'ember-room': [
+      { src: 'assets/images/ember-room-1.webp', width: 1200, height: 1800,
+        alt: 'Интерьер домика с ванной у панорамного окна' },
+      { src: 'assets/images/ember-room-4.webp', width: 1200, height: 1600,
+        alt: 'Деревянная комната с винным стеллажом и тёплой гирляндой' }
+    ]
+  };
+
+  var photos = [];
+  var index = 0;
+
+  function collect(group) {
+    var fromMarkup = Array.prototype.map.call(
+      document.querySelectorAll('img[data-gallery="' + group + '"]'),
+      function (img) {
+        return {
+          src: img.getAttribute('src'),
+          alt: img.getAttribute('alt') || '',
+          width: img.getAttribute('width'),
+          height: img.getAttribute('height')
+        };
+      }
+    );
+
+    return fromMarkup.concat(EXTRA_PHOTOS[group] || []);
+  }
+
+  function show(next) {
+    if (photos.length === 0) return;
+
+    index = (next % photos.length + photos.length) % photos.length;
+
+    var photo = photos[index];
+    imageEl.setAttribute('src', photo.src);
+    imageEl.setAttribute('alt', photo.alt);
+    if (photo.width) imageEl.setAttribute('width', photo.width);
+    if (photo.height) imageEl.setAttribute('height', photo.height);
+
+    counterEl.textContent = (index + 1) + ' / ' + photos.length;
+
+    // Одно фото — перелистывать нечего, прячем и стрелки, и счётчик
+    barEl.hidden = photos.length < 2;
+  }
+
+  // Перехват: набор должен быть готов до того, как окно откроется
+  document.addEventListener('click', function (event) {
+    var trigger = event.target.closest('[data-gallery-open]');
+    if (!trigger) return;
+
+    photos = collect(trigger.getAttribute('data-gallery-open'));
+    show(parseInt(trigger.getAttribute('data-gallery-index'), 10) || 0);
+  }, true);
+
+  prevBtn.addEventListener('click', function () { show(index - 1); });
+  nextBtn.addEventListener('click', function () { show(index + 1); });
+
+  document.addEventListener('keydown', function (event) {
+    if (modal.hidden || photos.length < 2) return;
+
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      show(index - 1);
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      show(index + 1);
+    }
+  });
+
+  /* --- Свайп на телефоне --- */
+
+  var touchStartX = null;
+
+  stageEl.addEventListener('touchstart', function (event) {
+    touchStartX = event.changedTouches[0].clientX;
+  }, { passive: true });
+
+  stageEl.addEventListener('touchend', function (event) {
+    if (touchStartX === null) return;
+
+    var shift = event.changedTouches[0].clientX - touchStartX;
+    touchStartX = null;
+
+    if (photos.length < 2 || Math.abs(shift) < SWIPE_THRESHOLD) return;
+
+    show(shift < 0 ? index + 1 : index - 1);
+  }, { passive: true });
+})();
+
+
+/* --------------------------------------------------------------------------
    Форма заявки
 
    Проверка полей своя, на русском, под полем — как в первом проекте.
@@ -869,7 +1056,7 @@ var CABINS = {
   }
 
   function cabinName(cabinId) {
-    return CABINS[cabinId] ? CABINS[cabinId].name : 'домике';
+    return CABINS[cabinId] ? CABINS[cabinId].name : 'без названия';
   }
 
   function guestsWord(count) {
@@ -926,7 +1113,7 @@ var CABINS = {
 
     if (isFinite(current) && current > max) {
       guestsField.value = max;
-      guestsHint.textContent = 'В «' + cabinName(cabinField.value) + '» размещаются не больше '
+      guestsHint.textContent = 'В домике «' + cabinName(cabinField.value) + '» размещаются не больше '
         + max + ' ' + guestsWord(max) + ' — уменьшили число гостей.';
     }
 
@@ -944,7 +1131,7 @@ var CABINS = {
     }
 
     if (value > max) {
-      showError(guestsField, guestsError, 'В «' + cabinName(cabinField.value)
+      showError(guestsField, guestsError, 'В домике «' + cabinName(cabinField.value)
         + '» размещаются не больше ' + max + ' ' + guestsWord(max) + '.');
       return false;
     }
