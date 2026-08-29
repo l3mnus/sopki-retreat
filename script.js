@@ -180,6 +180,11 @@ var modals = (function () {
     modal.hidden = false;
     document.body.classList.add('has-modal-open');
 
+    // Кнопки-переключатели (бургер) сообщают состояние через aria-expanded
+    if (lastTrigger && lastTrigger.hasAttribute('aria-expanded')) {
+      lastTrigger.setAttribute('aria-expanded', 'true');
+    }
+
     // Фокус — на кнопку закрытия, иначе на само окно
     var dialog = modal.querySelector('.modal__dialog') || modal;
     var first = modal.querySelector('[data-modal-close]') || focusableIn(dialog)[0];
@@ -198,6 +203,10 @@ var modals = (function () {
     openModal.hidden = true;
     document.body.classList.remove('has-modal-open');
     openModal = null;
+
+    if (lastTrigger && lastTrigger.hasAttribute('aria-expanded')) {
+      lastTrigger.setAttribute('aria-expanded', 'false');
+    }
 
     // Возвращаем фокус туда, откуда пришли
     if (lastTrigger && document.contains(lastTrigger)) {
@@ -232,7 +241,14 @@ var modals = (function () {
     var trigger = event.target.closest('[data-modal-open]');
     if (trigger) {
       event.preventDefault();
-      open(trigger.getAttribute('data-modal-open'), trigger);
+
+      // Повторный клик по той же кнопке закрывает окно: так ведут себя
+      // переключатели вроде бургера
+      if (openModal && openModal.id === trigger.getAttribute('data-modal-open')) {
+        close();
+      } else {
+        open(trigger.getAttribute('data-modal-open'), trigger);
+      }
       return;
     }
 
@@ -253,6 +269,64 @@ var modals = (function () {
   });
 
   return { open: open, close: close };
+})();
+
+
+/* --------------------------------------------------------------------------
+   Мобильное меню
+
+   Своей логики окна здесь нет: панель — обычный [data-modal], её открывает
+   и закрывает общий механизм modals (Escape, клик вне, ловушка фокуса,
+   возврат фокуса на кнопку, блокировка прокрутки).
+
+   Пункты не дублируются в разметке, а копируются из навигации в шапке:
+   список остаётся в одном месте. Каждой копии добавляется data-modal-close,
+   поэтому переход к разделу заодно закрывает панель.
+   -------------------------------------------------------------------------- */
+
+(function initNavPanel() {
+  var panelList = document.querySelector('[data-nav-panel-list]');
+  var headerLinks = document.querySelectorAll('.site-nav__list a');
+  var toggle = document.querySelector('.nav-toggle');
+  if (!panelList || headerLinks.length === 0 || !toggle) return;
+
+  Array.prototype.forEach.call(headerLinks, function (link) {
+    var item = document.createElement('li');
+    var copy = document.createElement('a');
+
+    copy.setAttribute('href', link.getAttribute('href'));
+    copy.setAttribute('data-modal-close', '');
+    copy.textContent = link.textContent;
+
+    item.appendChild(copy);
+    panelList.appendChild(item);
+  });
+
+  // Если ширина доросла до десктопной, пока панель открыта, панель пропадёт
+  // из вида по CSS — закрываем её сами, иначе прокрутка останется
+  // заблокированной, а фокус запертым в невидимом окне.
+  //
+  // Признак десктопа берём не из копии медиазапроса, а из того, спрятана ли
+  // сама кнопка: брейкпоинт остаётся в одном месте — в CSS.
+  function closeIfBurgerHidden() {
+    var panel = document.getElementById('site-nav-mobile');
+    if (!panel || panel.hidden) return;
+
+    if (window.getComputedStyle(toggle).display === 'none') {
+      modals.close();
+    }
+  }
+
+  // Слушаем оба события: браузеры шлют их в разных сочетаниях
+  var desktop = window.matchMedia('(min-width: 60rem)');
+
+  if (desktop.addEventListener) {
+    desktop.addEventListener('change', closeIfBurgerHidden);
+  } else if (desktop.addListener) {
+    desktop.addListener(closeIfBurgerHidden);
+  }
+
+  window.addEventListener('resize', closeIfBurgerHidden);
 })();
 
 

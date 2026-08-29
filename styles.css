@@ -1521,3 +1521,85 @@ p {
   font-variant-numeric: tabular-nums;
   color: var(--color-text-faint);
 }
+
+
+/* --------------------------------------------------------------------------
+   9. МОБИЛЬНОЕ МЕНЮ — панель на весь экран
+   Тот же компонент modal, но во всю высоту и с крупными пунктами.
+   -------------------------------------------------------------------------- */
+
+.nav-panel {
+  padding: 0;
+}
+
+.nav-panel__dialog {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  padding-block: var(--space-2xl);
+  padding-inline: var(--container-gutter);
+  padding-top: max(var(--space-3xl), calc(env(safe-area-inset-top) + var(--space-2xl)));
+  padding-bottom: max(var(--space-2xl), calc(env(safe-area-inset-bottom) + var(--space-m)));
+  padding-left: max(var(--container-gutter), env(safe-area-inset-left));
+  padding-right: max(var(--container-gutter), env(safe-area-inset-right));
+  background-color: var(--color-bg);
+  border: none;
+  border-radius: 0;
+  overflow-y: auto;
+}
+
+/* Кнопка закрытия не должна попадать под вырез и «чёлку» */
+.nav-panel .modal__close {
+  top: max(var(--space-2xs), env(safe-area-inset-top));
+  right: max(var(--space-2xs), env(safe-area-inset-right));
+}
+
+.nav-panel__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-panel__list a {
+  display: flex;
+  align-items: center;
+  min-height: 56px;                       /* зона нажатия с запасом к 44px */
+  padding-block: var(--space-2xs);
+  border-bottom: var(--border-hairline);
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  line-height: var(--leading-tight);
+  color: var(--color-text);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.nav-panel__list li:last-child a {
+  border-bottom: none;
+}
+
+.nav-panel__list a:hover {
+  color: var(--color-accent);
+}
+
+/* Своя анимация вместо общей modal-in; под prefers-reduced-motion её нет */
+@media (prefers-reduced-motion: no-preference) {
+  .nav-panel__dialog {
+    animation: nav-panel-in var(--duration-base) var(--ease-out);
+  }
+}
+
+@keyframes nav-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-1.5rem);
+  }
+}
+
+/* На десктопе меню в шапке, панель не нужна */
+@media (min-width: 60rem) {
+  .nav-panel {
+    display: none;
+  }
+}
