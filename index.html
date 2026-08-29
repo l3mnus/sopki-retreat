@@ -22,9 +22,10 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   -->
 
-  <!-- Шрифты подключаются локально из /fonts через @font-face в styles.css (без CDN) -->
-  <link rel="preload" href="fonts/cormorant-garamond-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/manrope-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- Шрифты подключаются локально из /fonts через @font-face в styles.css (без CDN).
+       Предзагружаем только обычные начертания: ими набран первый экран. -->
+  <link rel="preload" href="fonts/cormorant-garamond-v21-cyrillic_latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/manrope-v20-cyrillic_latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <link rel="stylesheet" href="styles.css">
 </head>

@@ -7,44 +7,44 @@
 /* --------------------------------------------------------------------------
    1. ШРИФТЫ — только локально, без CDN (см. CLAUDE.md)
    Заголовки — антиква, текст — гротеск. Ни Inter, ни Roboto.
-   Предварительный выбор: Cormorant Garamond + Manrope (оба с кириллицей, OFL).
-   Файлы .woff2 нужно скачать в /fonts — сейчас работают фолбэки.
+   Cormorant Garamond + Manrope, оба под OFL.
+
+   В скачанных файлах кириллица и латиница лежат вместе, поэтому
+   unicode-range не нужен: разделение идёт по начертаниям.
+   Есть только два веса на семейство — 400 и 600. Значения font-weight
+   в стилях подобраны под них, чтобы браузер не подделывал начертание.
    -------------------------------------------------------------------------- */
 
 @font-face {
   font-family: 'Cormorant Garamond';
-  src: url('fonts/cormorant-garamond-cyrillic.woff2') format('woff2');
-  font-weight: 300 700;
+  src: url('fonts/cormorant-garamond-v21-cyrillic_latin-regular.woff2') format('woff2');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 
 @font-face {
   font-family: 'Cormorant Garamond';
-  src: url('fonts/cormorant-garamond-latin.woff2') format('woff2');
-  font-weight: 300 700;
+  src: url('fonts/cormorant-garamond-v21-cyrillic_latin-600.woff2') format('woff2');
+  font-weight: 600;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212;
 }
 
 @font-face {
   font-family: 'Manrope';
-  src: url('fonts/manrope-cyrillic.woff2') format('woff2');
-  font-weight: 300 800;
+  src: url('fonts/manrope-v20-cyrillic_latin-regular.woff2') format('woff2');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 
 @font-face {
   font-family: 'Manrope';
-  src: url('fonts/manrope-latin.woff2') format('woff2');
-  font-weight: 300 800;
+  src: url('fonts/manrope-v20-cyrillic_latin-600.woff2') format('woff2');
+  font-weight: 600;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212;
 }
 
 
@@ -267,13 +267,17 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 400;              /* база; h2 ниже перекрывает на 600 */
   line-height: var(--leading-tight);
   letter-spacing: -0.01em;
 }
 
 h1 { font-size: var(--step-5); }
-h2 { font-size: var(--step-3); }
+
+/* Заголовки секций плотнее остальных: у Cormorant Garamond есть настоящее
+   начертание 600, подделывать браузеру ничего не нужно */
+h2 { font-size: var(--step-3); font-weight: 600; }
+
 h3 { font-size: var(--step-1); }
 
 p {
@@ -875,7 +879,7 @@ p {
   border-color: var(--color-accent-hover);
   border-width: 2px;
   color: var(--color-on-accent);
-  font-weight: 700;
+  font-weight: 600;              /* 700 у Manrope нет, взяли ближайший реальный */
 }
 
 .calendar__day.is-start .calendar__day-price,
