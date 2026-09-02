@@ -10,6 +10,146 @@
 'use strict';
 
 
+/* --------------------------------------------------------------------------
+   Язык интерфейса
+
+   Словарь лежит в i18n.js и подключается раньше этого файла. Здесь только
+   применение: тексты по data-i18n, атрибуты по data-i18n-alt / -label /
+   -placeholder, плюс t() для строк, которые собираются на ходу.
+
+   Выбор запоминается в localStorage. При первом визите язык берётся из
+   navigator.language, при отсутствии совпадения — русский.
+
+   Модули, которые рисуют текст сами (календарь, форма, виджет сияния),
+   слушают событие i18n:change и перерисовываются.
+   -------------------------------------------------------------------------- */
+
+var i18n = (function () {
+  var STORAGE_KEY = 'sopki-lang';
+  var FALLBACK = 'ru';
+
+  // Для Intl нужен настоящий код языка, а не наша метка вкладки
+  var LOCALES = { ru: 'ru', en: 'en', cn: 'zh' };
+
+  var dictionaries = (typeof I18N !== 'undefined') ? I18N : {};
+  var current = FALLBACK;
+
+  function t(key, values) {
+    var line = dictionaries[current] && dictionaries[current][key];
+
+    if (line === undefined) {
+      line = dictionaries[FALLBACK] && dictionaries[FALLBACK][key];
+    }
+    if (line === undefined) {
+      return key;
+    }
+    if (!values) {
+      return line;
+    }
+
+    return line.replace(/\{(\w+)\}/g, function (match, name) {
+      return values[name] !== undefined ? values[name] : match;
+    });
+  }
+
+  // Форм множественного числа у языков разное количество: у русского три,
+  // у английского две, у китайского одна. Спрашиваем у Intl, а не считаем сами.
+  function plural(count, prefix) {
+    var form = 'other';
+
+    try {
+      form = new Intl.PluralRules(LOCALES[current]).select(count);
+    } catch (error) {
+      /* нет Intl.PluralRules — обойдёмся общей формой */
+    }
+
+    var line = dictionaries[current] && dictionaries[current][prefix + '.' + form];
+    return line !== undefined ? line : t(prefix + '.other');
+  }
+
+  function detect() {
+    var saved = null;
+
+    try {
+      saved = localStorage.getItem(STORAGE_KEY);
+    } catch (error) {
+      /* приватный режим или запрет хранилища — не страшно */
+    }
+    if (saved && dictionaries[saved]) return saved;
+
+    var preferred = (navigator.language || '').toLowerCase();
+    if (preferred.indexOf('en') === 0) return 'en';
+    if (preferred.indexOf('zh') === 0) return 'cn';
+
+    return FALLBACK;
+  }
+
+  var SLOTS = [
+    ['data-i18n', null],
+    ['data-i18n-alt', 'alt'],
+    ['data-i18n-label', 'aria-label'],
+    ['data-i18n-placeholder', 'placeholder']
+  ];
+
+  function applyStatic() {
+    document.documentElement.setAttribute('lang', LOCALES[current] || current);
+
+    SLOTS.forEach(function (slot) {
+      Array.prototype.forEach.call(
+        document.querySelectorAll('[' + slot[0] + ']'),
+        function (node) {
+          var value = t(node.getAttribute(slot[0]));
+          if (slot[1]) {
+            node.setAttribute(slot[1], value);
+          } else {
+            node.textContent = value;
+          }
+        }
+      );
+    });
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-lang]'),
+      function (button) {
+        var active = button.getAttribute('data-lang') === current;
+        button.setAttribute('aria-pressed', active ? 'true' : 'false');
+        button.classList.toggle('is-current', active);
+      }
+    );
+  }
+
+  function set(next) {
+    if (!dictionaries[next] || next === current) return;
+
+    current = next;
+
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+    } catch (error) {
+      /* не сохранилось — язык всё равно применится на этой странице */
+    }
+
+    applyStatic();
+    document.dispatchEvent(new CustomEvent('i18n:change', { detail: { lang: next } }));
+  }
+
+  document.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-lang]');
+    if (button) set(button.getAttribute('data-lang'));
+  });
+
+  function onChange(handler) {
+    document.addEventListener('i18n:change', handler);
+  }
+
+  current = detect();
+  applyStatic();
+
+  return { t: t, plural: plural, set: set, onChange: onChange,
+           lang: function () { return current; } };
+})();
+
+
 /* Скорость фонового видео на первом экране: 1 — как снято, меньше — медленнее.
    Значение подбирается на глаз, менять здесь. */
 var HERO_PLAYBACK_RATE = 0.6;
@@ -18,24 +158,26 @@ var HERO_PLAYBACK_RATE = 0.6;
 /* --------------------------------------------------------------------------
    Фоновое видео первого экрана
 
-   Автозапуск обеспечивают атрибуты muted, playsinline, loop и autoplay
-   в разметке — без JavaScript видео тоже играет. Скрипт только замедляет
-   воспроизведение и выключает его тем, кто просил меньше движения:
-   у видео снимается источник, и браузер показывает постер.
+   Ролик весит около 2 МБ, и на критическом пути ему делать нечего: сразу
+   показывается постер, а адрес видео ждёт своей очереди в data-src.
+   Источник подставляется после события load или по первому действию
+   человека — что случится раньше.
+
+   Тем, кто просил меньше движения, видео не грузится вообще: остаётся
+   постер. Проявляется ролик только когда реально пошло воспроизведение,
+   поэтому подмена не мигает.
    -------------------------------------------------------------------------- */
 
 (function initHeroVideo() {
   var video = document.querySelector('[data-hero-video]');
   if (!video) return;
 
-  var query = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var source = video.getAttribute('data-src');
+  if (!source) return;
 
-  function showPosterOnly() {
-    video.pause();
-    video.removeAttribute('autoplay');
-    video.removeAttribute('src');
-    video.load();
-  }
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var started = false;
 
   // Часть браузеров сбрасывает скорость при загрузке источника, поэтому
   // выставляем её и на события, а не только один раз
@@ -47,14 +189,38 @@ var HERO_PLAYBACK_RATE = 0.6;
     }
   }
 
-  if (query.matches) {
-    showPosterOnly();
-    return;
+  function reveal() {
+    applyRate();
+    video.classList.add('is-ready');
   }
 
-  applyRate();
-  video.addEventListener('loadedmetadata', applyRate);
-  video.addEventListener('play', applyRate);
+  function start() {
+    if (started) return;
+    started = true;
+
+    video.addEventListener('loadedmetadata', applyRate);
+    video.addEventListener('playing', reveal, { once: true });
+
+    video.setAttribute('src', source);
+    video.load();
+
+    // Атрибута autoplay обычно достаточно, но запуск может и не случиться —
+    // просим явно и молча принимаем отказ политики автовоспроизведения
+    var attempt = video.play();
+    if (attempt && attempt.catch) {
+      attempt.catch(function () {});
+    }
+  }
+
+  if (document.readyState === 'complete') {
+    start();
+  } else {
+    window.addEventListener('load', start, { once: true });
+  }
+
+  ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach(function (type) {
+    window.addEventListener(type, start, { once: true, passive: true });
+  });
 })();
 
 
@@ -67,11 +233,17 @@ var HERO_PLAYBACK_RATE = 0.6;
 
    Пороги вероятности: 0–2 низкая, 3–4 средняя, 5+ высокая.
    Любая ошибка (сеть, CORS, пустой или неожиданный ответ) показывается
-   в самом виджете, а не в консоли.
+   в самом виджете, а не в консоли, и рядом появляется «Обновить».
+
+   Запрос ограничен по времени. Соединение может открыться и замолчать —
+   тогда fetch не отвалится сам, .catch не сработает никогда и виджет
+   навсегда останется в «Загружаем прогноз…». AbortController обрывает
+   такой запрос через TIMEOUT.
    -------------------------------------------------------------------------- */
 
 (function initAuroraWidget() {
   var ENDPOINT = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json';
+  var TIMEOUT = 8000;
 
   var widget = document.querySelector('[data-aurora]');
   if (!widget) return;
@@ -80,19 +252,39 @@ var HERO_PLAYBACK_RATE = 0.6;
   var resultEl = widget.querySelector('[data-aurora-result]');
   var kpEl = widget.querySelector('[data-aurora-kp]');
   var labelEl = widget.querySelector('[data-aurora-label]');
+  var retryEl = widget.querySelector('[data-aurora-retry]');
   if (!stateEl || !resultEl || !kpEl || !labelEl) return;
 
-  function showUnavailable() {
-    stateEl.textContent = 'Прогноз временно недоступен';
-    stateEl.hidden = false;
-    resultEl.hidden = true;
-  }
+  // Состояние держим явно: 'loading' | 'ready' | 'error'. Раньше оно
+  // выводилось из hidden-флагов, и загрузку нельзя было отличить от ошибки —
+  // при смене языка «Загружаем…» превращалось в «Прогноз недоступен».
+  var state = 'loading';
+  var lastKp = null;
+  var pending = false;
 
   function probabilityLabel(kp) {
-    if (kp >= 5) return 'высокая вероятность';
-    if (kp >= 3) return 'средняя вероятность';
-    return 'низкая вероятность';
+    if (kp >= 5) return i18n.t('aurora.high');
+    if (kp >= 3) return i18n.t('aurora.medium');
+    return i18n.t('aurora.low');
   }
+
+  function render() {
+    if (state === 'ready' && lastKp !== null) {
+      kpEl.textContent = i18n.t('aurora.kp', { value: lastKp.toFixed(1) });
+      labelEl.textContent = probabilityLabel(lastKp);
+      stateEl.hidden = true;
+      resultEl.hidden = false;
+      if (retryEl) retryEl.hidden = true;
+      return;
+    }
+
+    stateEl.textContent = i18n.t(state === 'error' ? 'aurora.unavailable' : 'aurora.loading');
+    stateEl.hidden = false;
+    resultEl.hidden = true;
+    if (retryEl) retryEl.hidden = state !== 'error';
+  }
+
+  i18n.onChange(render);
 
   // NOAA у разных продуктов отдаёт то массив объектов, то массив массивов
   // с шапкой в первой строке — разбираем оба варианта.
@@ -114,21 +306,49 @@ var HERO_PLAYBACK_RATE = 0.6;
     return isFinite(kp) ? kp : null;
   }
 
-  fetch(ENDPOINT, { cache: 'no-store' })
-    .then(function (response) {
-      if (!response.ok) throw new Error('HTTP ' + response.status);
-      return response.json();
-    })
-    .then(function (data) {
-      var kp = extractLatestKp(data);
-      if (kp === null) throw new Error('Не удалось разобрать ответ');
+  function load() {
+    if (pending) return;
+    pending = true;
 
-      kpEl.textContent = 'Kp ' + kp.toFixed(1);
-      labelEl.textContent = probabilityLabel(kp);
-      stateEl.hidden = true;
-      resultEl.hidden = false;
-    })
-    .catch(showUnavailable);
+    state = 'loading';
+    render();
+
+    var controller = ('AbortController' in window) ? new AbortController() : null;
+    var timer = window.setTimeout(function () {
+      if (controller) controller.abort();
+    }, TIMEOUT);
+
+    // Таймер снимаем здесь, а не раньше: срок отведён на весь запрос,
+    // включая чтение тела ответа — оно тоже умеет виснуть.
+    function settle(next, kp) {
+      window.clearTimeout(timer);
+      pending = false;
+      state = next;
+      if (kp !== undefined) lastKp = kp;
+      render();
+    }
+
+    var options = { cache: 'no-store' };
+    if (controller) options.signal = controller.signal;
+
+    fetch(ENDPOINT, options)
+      .then(function (response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      })
+      .then(function (data) {
+        var kp = extractLatestKp(data);
+        if (kp === null) throw new Error('Не удалось разобрать ответ');
+        settle('ready', kp);
+      })
+      .catch(function () {
+        settle('error');
+      });
+  }
+
+  if (retryEl) retryEl.addEventListener('click', load);
+
+  load();
 })();
 
 
@@ -273,6 +493,73 @@ var modals = (function () {
 
 
 /* --------------------------------------------------------------------------
+   Уведомление о хранении
+
+   Баннер не модальный: фокус не запирается, страница остаётся доступной.
+   Закрывается кнопкой «Понятно» — только она считается ответом, поэтому
+   переход по «Подробнее» уведомление не гасит.
+   -------------------------------------------------------------------------- */
+
+(function initCookieNotice() {
+  var STORAGE_KEY = 'sopki-cookie';
+
+  var banner = document.querySelector('[data-cookie]');
+  if (!banner) return;
+
+  var answered = null;
+  try {
+    answered = localStorage.getItem(STORAGE_KEY);
+  } catch (error) {
+    /* хранилище недоступно — покажем уведомление в этот заход */
+  }
+  if (answered) return;
+
+  banner.hidden = false;
+
+  banner.addEventListener('click', function (event) {
+    if (!event.target.closest('[data-cookie-accept]')) return;
+
+    banner.hidden = true;
+
+    try {
+      localStorage.setItem(STORAGE_KEY, '1');
+    } catch (error) {
+      /* не сохранилось — в следующий раз спросим снова */
+    }
+  });
+})();
+
+
+/* --------------------------------------------------------------------------
+   Возврат к началу страницы
+
+   Одной разметкой это не чинится. Раньше id="top" стоял на прилипающей
+   шапке, и браузеру было некуда прокручивать. Перенос якоря выше помог
+   лишь наполовину: к элементу нулевого размера Chrome тоже не
+   прокручивается — хэш меняется, страница стоит.
+
+   Поэтому ссылки на #top обрабатываем сами. Плавность включаем только
+   тем, кто не просил уменьшить движение.
+   -------------------------------------------------------------------------- */
+
+(function initScrollToTop() {
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.addEventListener('click', function (event) {
+    var link = event.target.closest('a[href="#top"]');
+    if (!link) return;
+
+    event.preventDefault();
+
+    window.scrollTo({
+      top: 0,
+      behavior: reduced.matches ? 'auto' : 'smooth'
+    });
+  });
+})();
+
+
+/* --------------------------------------------------------------------------
    Мобильное меню
 
    Своей логики окна здесь нет: панель — обычный [data-modal], её открывает
@@ -297,6 +584,10 @@ var modals = (function () {
     copy.setAttribute('href', link.getAttribute('href'));
     copy.setAttribute('data-modal-close', '');
     copy.textContent = link.textContent;
+
+    // Переносим ключ перевода, иначе копия застынет на языке загрузки
+    var key = link.getAttribute('data-i18n');
+    if (key) copy.setAttribute('data-i18n', key);
 
     item.appendChild(copy);
     panelList.appendChild(item);
@@ -336,11 +627,51 @@ var modals = (function () {
    размещается. Цена от числа гостей не зависит.
    -------------------------------------------------------------------------- */
 
+/* Разряды и денежный формат нужны и календарю, и карточкам номеров,
+   поэтому лежат снаружи обоих модулей. */
+function groupDigits(value, separator) {
+  return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+}
+
+// В панели итога и в подсказках — полный формат
+function formatMoney(value) {
+  return i18n.t('money', { value: groupDigits(value, ' ') });
+}
+
+
 var CABINS = {
   'aurora-cabin': { name: 'Сияние', base: 24000, capacity: 4 },
   'fjeld-suite': { name: 'Панорама', base: 19000, capacity: 4 },
   'ember-room': { name: 'Очаг', base: 14000, capacity: 2 }
 };
+
+
+/* --------------------------------------------------------------------------
+   Цена за ночь в карточках номеров
+
+   Единственный источник — CABINS выше. Раньше та же цифра лежала ещё и
+   строкой в каждом из трёх словарей, и словарь разъехался с календарём:
+   в карточке стояло 24 000, а дешевле 30 000 в календаре не выбиралось.
+
+   В подписи «от»: база — это минимум, к которому priceFor() добавляет
+   надбавки за выходные и высокий сезон.
+   -------------------------------------------------------------------------- */
+
+(function initRoomPrices() {
+  var nodes = document.querySelectorAll('[data-room-price]');
+  if (!nodes.length) return;
+
+  function render() {
+    Array.prototype.forEach.call(nodes, function (node) {
+      var cabin = CABINS[node.getAttribute('data-room-price')];
+      if (!cabin) return;
+      node.textContent = i18n.t('rooms.priceFrom', { value: formatMoney(cabin.base) });
+    });
+  }
+
+  render();
+  i18n.onChange(render);
+})();
 
 
 /* --------------------------------------------------------------------------
@@ -366,15 +697,15 @@ var CABINS = {
     'ember-room': [[1, 2], [14, 3], [28, 3], [40, 4], [65, 2], [83, 3]]
   };
 
-  var MONTHS_NOMINATIVE = [
-    'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-  ];
+  // Названия месяцев берём из словаря: именительный — для шапки,
+  // родительный — для дат вида «15 января»
+  function monthName(month) {
+    return i18n.t('calendar.month.' + (month + 1));
+  }
 
-  var MONTHS_GENITIVE = [
-    'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-    'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
-  ];
+  function monthGenitive(month) {
+    return i18n.t('calendar.monthGen.' + (month + 1));
+  }
 
   /* --- Элементы --- */
 
@@ -477,35 +808,29 @@ var CABINS = {
     return Math.round(price);
   }
 
-  function groupDigits(value, separator) {
-    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, separator);
-  }
-
-  // В панели итога и в подсказках — полный формат
-  function formatMoney(value) {
-    return groupDigits(value, ' ') + ' ₽';
-  }
-
   // В ячейке дня места мало: тонкий пробел вместо обычного, знак рубля не влезает
   function formatCellPrice(value) {
     return groupDigits(value, ' ');
   }
 
+  // Порядок частей даты задан в словаре — у языков он разный
   function formatDate(date) {
-    return date.getDate() + ' ' + MONTHS_GENITIVE[date.getMonth()];
+    return i18n.t('calendar.dateShort', {
+      day: date.getDate(),
+      month: monthGenitive(date.getMonth())
+    });
   }
 
   function formatDateWithYear(date) {
-    return formatDate(date) + ' ' + date.getFullYear();
+    return i18n.t('calendar.dateFull', {
+      day: date.getDate(),
+      month: monthGenitive(date.getMonth()),
+      year: date.getFullYear()
+    });
   }
 
   function nightsWord(count) {
-    var tail = count % 10;
-    var hundred = count % 100;
-
-    if (tail === 1 && hundred !== 11) return 'ночь';
-    if (tail >= 2 && tail <= 4 && (hundred < 10 || hundred >= 20)) return 'ночи';
-    return 'ночей';
+    return i18n.plural(count, 'nights');
   }
 
   /* --- Состояние --- */
@@ -573,7 +898,7 @@ var CABINS = {
       // Выезд раньше заезда — считаем это новой датой заезда
       checkIn = date;
     } else if (rangeHasBooked(cabin, checkIn, date)) {
-      showMessage('В этом диапазоне есть занятые даты');
+      showMessage(i18n.t('calendar.conflict'));
     } else {
       checkOut = date;
     }
@@ -601,11 +926,11 @@ var CABINS = {
     if (past) {
       button.classList.add('is-past');
       button.setAttribute('aria-disabled', 'true');
-      label += ', прошедшая дата';
+      label += ', ' + i18n.t('calendar.day.past');
     } else if (booked) {
       button.classList.add('is-busy');
       button.setAttribute('aria-disabled', 'true');
-      label += ', занято';
+      label += ', ' + i18n.t('calendar.day.busy');
     } else {
       var price = priceFor(cabin, date);
 
@@ -614,17 +939,17 @@ var CABINS = {
       priceEl.textContent = formatCellPrice(price);
       button.appendChild(priceEl);
 
-      label += ', ' + formatMoney(price) + ', свободно';
+      label += ', ' + formatMoney(price) + ', ' + i18n.t('calendar.day.free');
 
       if (isSameDay(date, checkIn)) {
         button.classList.add('is-start');
-        label += ', дата заезда';
+        label += ', ' + i18n.t('calendar.day.checkin');
       } else if (isSameDay(date, checkOut)) {
         button.classList.add('is-end');
-        label += ', дата выезда';
+        label += ', ' + i18n.t('calendar.day.checkout');
       } else if (isInRange(date)) {
         button.classList.add('is-in-range');
-        label += ', в выбранном диапазоне';
+        label += ', ' + i18n.t('calendar.day.inRange');
       }
     }
 
@@ -636,7 +961,7 @@ var CABINS = {
     var year = viewMonth.getFullYear();
     var month = viewMonth.getMonth();
 
-    monthEl.textContent = MONTHS_NOMINATIVE[month] + ' ' + year;
+    monthEl.textContent = i18n.t('calendar.monthTitle', { month: monthName(month), year: year });
 
     gridEl.textContent = '';
 
@@ -658,7 +983,7 @@ var CABINS = {
   }
 
   function renderSummary() {
-    cabinEl.textContent = CABINS[cabin].name;
+    cabinEl.textContent = i18n.t('cabins.' + cabin);
 
     if (checkIn && checkOut) {
       var nights = nightsBetween(checkIn, checkOut);
@@ -733,7 +1058,7 @@ var CABINS = {
     // держать такой диапазон нельзя — оставляем заезд и просим выбрать выезд заново.
     if (checkIn && checkOut && rangeHasBooked(cabin, checkIn, checkOut)) {
       checkOut = null;
-      showMessage('В этом диапазоне есть занятые даты');
+      showMessage(i18n.t('calendar.conflict'));
     }
 
     if (checkIn && isBooked(cabin, checkIn)) {
@@ -747,6 +1072,8 @@ var CABINS = {
   // Тип домика выбирается только здесь. В форме он лежит скрытым полем —
   // держим его в актуальном состоянии, чтобы значение уехало с заявкой.
   if (formCabin) formCabin.value = cabin;
+
+  i18n.onChange(render);
 
   render();
 })();
@@ -834,7 +1161,7 @@ var CABINS = {
    подставился раньше, чем окно покажется.
    -------------------------------------------------------------------------- */
 
-(function initLightbox() {
+var lightbox = (function initLightbox() {
   var SWIPE_THRESHOLD = 40; // px, короче — считаем случайным касанием
 
   var modal = document.getElementById('modal-lightbox');
@@ -850,49 +1177,77 @@ var CABINS = {
 
   // Первый снимок каждого номера лежит в разметке карточки — это обложка.
   // Здесь перечислено то, что показывается дальше по порядку.
+  // Первый снимок каждого номера лежит в разметке карточки — это обложка.
+  // Здесь то, что показывается дальше. Подписи держим ключом словаря:
+  // готовая строка застыла бы на языке, который был при загрузке.
   var EXTRA_PHOTOS = {
     'aurora-cabin': [
       { src: 'assets/images/aurora-cabin-1.webp', width: 1200, height: 1600,
-        alt: 'Спальня с панорамным окном на заснеженную ель' },
+        altKey: 'photo.aurora-cabin-1' },
       { src: 'assets/images/aurora-cabin-3.webp', width: 1600, height: 2400,
-        alt: 'Спальня с тёмно-зелёными стенами и наклонным окном' },
+        altKey: 'photo.aurora-cabin-3' },
       { src: 'assets/images/aurora-cabin-4.webp', width: 1200, height: 800,
-        alt: 'Домик «Сияние» зимним вечером, тёплый свет из дверей' }
+        altKey: 'photo.aurora-cabin-4' }
     ],
     'fjeld-suite': [
       { src: 'assets/images/fjeld-suite-1.webp', width: 1200, height: 1800,
-        alt: 'Светлая гостиная с угловым диваном и видом на лес' },
+        altKey: 'photo.fjeld-suite-1' },
       { src: 'assets/images/fjeld-suite-2.webp', width: 1200, height: 800,
-        alt: 'Вид с террасы на заснеженные ели и горный хребет' },
+        altKey: 'photo.fjeld-suite-2' },
       { src: 'assets/images/fjeld-suite-3.webp', width: 1200, height: 800,
-        alt: 'Зона отдыха с креслом, овчиной и большим окном' }
+        altKey: 'photo.fjeld-suite-3' }
     ],
     // ember-room-2 из показа убран: кадр не подходит номеру
     'ember-room': [
       { src: 'assets/images/ember-room-1.webp', width: 1200, height: 1800,
-        alt: 'Интерьер домика с ванной у панорамного окна' },
+        altKey: 'photo.ember-room-1' },
       { src: 'assets/images/ember-room-4.webp', width: 1200, height: 1600,
-        alt: 'Деревянная комната с винным стеллажом и тёплой гирляндой' }
+        altKey: 'photo.ember-room-4' }
     ]
   };
 
   var photos = [];
   var index = 0;
 
-  function collect(group) {
-    var fromMarkup = Array.prototype.map.call(
-      document.querySelectorAll('img[data-gallery="' + group + '"]'),
+  // Наборы собираем один раз, при загрузке. Позже читать разметку нельзя:
+  // превью номера листается, и src картинки в карточке меняется — первый
+  // снимок «уехал» бы вслед за ним.
+  var galleries = (function buildGalleries() {
+    var result = {};
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll('img[data-gallery]'),
       function (img) {
-        return {
+        var group = img.getAttribute('data-gallery');
+        if (!result[group]) result[group] = [];
+
+        result[group].push({
           src: img.getAttribute('src'),
+          // Ключ важнее готовой строки: набор собирается один раз, а язык
+          // может смениться позже. alt оставляем запасным вариантом.
+          altKey: img.getAttribute('data-i18n-alt'),
           alt: img.getAttribute('alt') || '',
           width: img.getAttribute('width'),
           height: img.getAttribute('height')
-        };
+        });
       }
     );
 
-    return fromMarkup.concat(EXTRA_PHOTOS[group] || []);
+    Object.keys(EXTRA_PHOTOS).forEach(function (group) {
+      result[group] = (result[group] || []).concat(EXTRA_PHOTOS[group]);
+    });
+
+    return result;
+  })();
+
+  function collect(group) {
+    return galleries[group] || [];
+  }
+
+  // Подпись берём из словаря, если известен ключ: набор собран один раз,
+  // а язык может смениться в любой момент
+  function altOf(photo) {
+    return photo.altKey ? i18n.t(photo.altKey) : (photo.alt || '');
   }
 
   function show(next) {
@@ -902,7 +1257,7 @@ var CABINS = {
 
     var photo = photos[index];
     imageEl.setAttribute('src', photo.src);
-    imageEl.setAttribute('alt', photo.alt);
+    imageEl.setAttribute('alt', altOf(photo));
     if (photo.width) imageEl.setAttribute('width', photo.width);
     if (photo.height) imageEl.setAttribute('height', photo.height);
 
@@ -954,6 +1309,139 @@ var CABINS = {
 
     show(shift < 0 ? index + 1 : index - 1);
   }, { passive: true });
+
+  // Открытый лайтбокс переобует подпись вместе с языком
+  i18n.onChange(function () {
+    if (photos.length) show(index);
+  });
+
+  return {
+    SWIPE_THRESHOLD: SWIPE_THRESHOLD,
+    photosFor: collect,
+    altOf: altOf
+  };
+})();
+
+
+/* --------------------------------------------------------------------------
+   Превью номера: точки и переключение кадров
+
+   Под фотографией в карточке — ряд точек по числу снимков набора. Набор
+   берётся у лайтбокса, чтобы источник данных остался один.
+
+   Точки только показывают положение: они aria-hidden и не кликаются.
+   Листают свайпом по фото и стрелками ←/→, когда превью в фокусе.
+   Обычный клик по-прежнему открывает лайтбокс — и открывает его на том
+   кадре, который сейчас виден.
+   -------------------------------------------------------------------------- */
+
+(function initRoomPreview() {
+  var previews = document.querySelectorAll('.room-card__photo[data-gallery-open]');
+  if (previews.length === 0 || typeof lightbox === 'undefined') return;
+
+  Array.prototype.forEach.call(previews, function (button) {
+    var group = button.getAttribute('data-gallery-open');
+    var photos = lightbox.photosFor(group);
+    var image = button.querySelector('img');
+    var dotsBox = button.querySelector('.room-card__dots');
+
+    // Один снимок — листать нечего, индикатор не выводим вовсе
+    if (!image || !dotsBox || photos.length < 2) return;
+
+    // Берём ключ, а не готовую строку: при смене языка подпись пересоберётся
+    var labelKey = button.getAttribute('data-i18n-label');
+    var index = 0;
+    var dots = [];
+
+    photos.forEach(function () {
+      var dot = document.createElement('span');
+      dot.className = 'room-card__dot';
+      dotsBox.appendChild(dot);
+      dots.push(dot);
+    });
+
+    button.classList.add('is-gallery');
+
+    function render() {
+      var photo = photos[index];
+
+      image.setAttribute('src', photo.src);
+      image.setAttribute('alt', lightbox.altOf(photo));
+      if (photo.width) image.setAttribute('width', photo.width);
+      if (photo.height) image.setAttribute('height', photo.height);
+
+      dots.forEach(function (dot, i) {
+        dot.classList.toggle('is-current', i === index);
+      });
+
+      // Лайтбокс откроется на том же кадре, что виден в карточке
+      button.setAttribute('data-gallery-index', String(index));
+      // Разделитель тоже из словаря: в китайском перечисление отделяется
+      // своей запятой, а не латинской
+      button.setAttribute('aria-label', i18n.t('lightbox.labelJoin', {
+        label: i18n.t(labelKey),
+        photo: i18n.t('lightbox.photoOf', { n: index + 1, total: photos.length })
+      }));
+
+      // Перезапуск анимации проявления: снимаем класс, заставляем браузер
+      // пересчитать стиль, возвращаем. Сама анимация объявлена только для
+      // тех, кто не просил уменьшить движение.
+      image.classList.remove('is-fresh');
+      void image.offsetWidth;
+      image.classList.add('is-fresh');
+    }
+
+    function step(shift) {
+      index = (index + shift + photos.length) % photos.length;
+      render();
+    }
+
+    button.addEventListener('keydown', function (event) {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        step(-1);
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        step(1);
+      }
+    });
+
+    /* --- Свайп --- */
+
+    var startX = null;
+    var swiped = false;
+
+    button.addEventListener('touchstart', function (event) {
+      startX = event.changedTouches[0].clientX;
+      swiped = false;
+    }, { passive: true });
+
+    button.addEventListener('touchend', function (event) {
+      if (startX === null) return;
+
+      var shift = event.changedTouches[0].clientX - startX;
+      startX = null;
+
+      if (Math.abs(shift) < lightbox.SWIPE_THRESHOLD) return;
+
+      swiped = true;
+      step(shift < 0 ? 1 : -1);
+    }, { passive: true });
+
+    // После свайпа браузер всё равно шлёт click — он открыл бы лайтбокс.
+    // Гасим ровно один такой клик, на фазе перехвата, до общего обработчика окна.
+    button.addEventListener('click', function (event) {
+      if (!swiped) return;
+
+      swiped = false;
+      event.preventDefault();
+      event.stopPropagation();
+    }, true);
+
+    i18n.onChange(render);
+
+    render();
+  });
 })();
 
 
@@ -978,6 +1466,7 @@ var CABINS = {
   var cabinReadout = document.querySelector('[data-form-cabin]');
   var guestsField = document.getElementById('booking-guests');
   var childrenField = document.getElementById('booking-children');
+  var arrivalField = document.getElementById('booking-arrival');
   var trapField = document.getElementById('booking-company');
 
   var nameError = document.getElementById('booking-name-error');
@@ -1019,21 +1508,57 @@ var CABINS = {
   // не сработает, проверка браузера останется рабочей.
   form.noValidate = true;
 
-  function showError(field, box, message) {
-    box.textContent = message;
+  // Показанные сообщения помним ключом и подстановками: при смене языка
+  // их нужно перерисовать, а не гасить — человек не терял бы контекст.
+  // В атрибуте храним только нейтральные значения: идентификатор домика
+  // и числа. Название и форму слова пересобираем при каждой отрисовке —
+  // иначе после смены языка в строке остался бы кусок прежнего.
+  function renderLive(box) {
+    var key = box.getAttribute('data-i18n-live');
+    if (!key) return;
+
+    var raw = box.getAttribute('data-i18n-vars');
+    var values = raw ? JSON.parse(raw) : null;
+
+    if (values) {
+      if (values.cabinId) values.cabin = cabinName(values.cabinId);
+      if (typeof values.max === 'number') values.word = guestsWord(values.max);
+    }
+
+    box.textContent = i18n.t(key, values);
+  }
+
+  function showError(field, box, key, values) {
+    box.setAttribute('data-i18n-live', key);
+    box.setAttribute('data-i18n-vars', values ? JSON.stringify(values) : '');
+    renderLive(box);
     field.classList.add('has-error');
   }
 
   function clearError(field, box) {
+    box.removeAttribute('data-i18n-live');
+    box.removeAttribute('data-i18n-vars');
     box.textContent = '';
     field.classList.remove('has-error');
+  }
+
+  function showHint(box, key, values) {
+    box.setAttribute('data-i18n-live', key);
+    box.setAttribute('data-i18n-vars', values ? JSON.stringify(values) : '');
+    renderLive(box);
+  }
+
+  function clearHint(box) {
+    box.removeAttribute('data-i18n-live');
+    box.removeAttribute('data-i18n-vars');
+    box.textContent = '';
   }
 
   /* --- Имя --- */
 
   function validateName() {
     if (nameField.value.trim().length < 2) {
-      showError(nameField, nameError, 'Укажите имя — не короче двух букв.');
+      showError(nameField, nameError, 'form.error.name');
       return false;
     }
     clearError(nameField, nameError);
@@ -1107,13 +1632,13 @@ var CABINS = {
     var digits = localDigits(phoneField.value);
 
     if (digits.length === 0) {
-      showError(phoneField, phoneError, 'Укажите телефон для связи.');
+      showError(phoneField, phoneError, 'form.error.phoneEmpty');
       return false;
     }
 
     // Без кода страны в российском номере ровно 10 цифр
     if (digits.length !== 10) {
-      showError(phoneField, phoneError, 'Введите номер полностью: +7 (999) 123-45-67.');
+      showError(phoneField, phoneError, 'form.error.phoneShort');
       return false;
     }
 
@@ -1130,13 +1655,11 @@ var CABINS = {
   }
 
   function cabinName(cabinId) {
-    return CABINS[cabinId] ? CABINS[cabinId].name : 'без названия';
+    return i18n.t('cabins.' + cabinId);
   }
 
   function guestsWord(count) {
-    var tail = count % 10;
-    var hundred = count % 100;
-    return (tail === 1 && hundred !== 11) ? 'гостя' : 'гостей';
+    return i18n.plural(count, 'guests');
   }
 
   // Границы и значение меняем из кода, а такие правки события не шлют.
@@ -1161,13 +1684,12 @@ var CABINS = {
     var current = parseInt(childrenField.value, 10);
 
     childrenField.max = max;
-    childrenHint.textContent = '';
+    clearHint(childrenHint);
 
     if (isFinite(current) && current > max) {
       childrenField.value = max;
-      childrenHint.textContent = max === 0
-        ? 'С одним гостем детей указать нельзя: в домике нужен хотя бы один взрослый.'
-        : 'В домике нужен хотя бы один взрослый — уменьшили число детей до ' + max + '.';
+      showHint(childrenHint, max === 0 ? 'form.hint.childrenNone' : 'form.hint.childrenReduced',
+        { max: max });
     }
 
     refreshStepper(childrenField);
@@ -1183,12 +1705,12 @@ var CABINS = {
     if (cabinReadout) cabinReadout.textContent = cabinName(cabinField.value);
 
     guestsField.max = max;
-    guestsHint.textContent = '';
+    clearHint(guestsHint);
 
     if (isFinite(current) && current > max) {
       guestsField.value = max;
-      guestsHint.textContent = 'В домике «' + cabinName(cabinField.value) + '» размещаются не больше '
-        + max + ' ' + guestsWord(max) + ' — уменьшили число гостей.';
+      showHint(guestsHint, 'form.hint.guestsReduced',
+        { cabinId: cabinField.value, max: max });
     }
 
     refreshStepper(guestsField);
@@ -1200,13 +1722,13 @@ var CABINS = {
     var value = parseInt(guestsField.value, 10);
 
     if (!isFinite(value) || value < 1) {
-      showError(guestsField, guestsError, 'Укажите число гостей — не меньше одного.');
+      showError(guestsField, guestsError, 'form.error.guestsMin');
       return false;
     }
 
     if (value > max) {
-      showError(guestsField, guestsError, 'В домике «' + cabinName(cabinField.value)
-        + '» размещаются не больше ' + max + ' ' + guestsWord(max) + '.');
+      showError(guestsField, guestsError, 'form.error.guestsMax',
+        { cabinId: cabinField.value, max: max });
       return false;
     }
 
@@ -1226,13 +1748,12 @@ var CABINS = {
     var value = parseInt(raw, 10);
 
     if (!isFinite(value) || value < 0) {
-      showError(childrenField, childrenError, 'Число детей не может быть меньше нуля.');
+      showError(childrenField, childrenError, 'form.error.childrenNegative');
       return false;
     }
 
     if (value > childrenLimit()) {
-      showError(childrenField, childrenError,
-        'В домике нужен хотя бы один взрослый: детей не больше, чем гостей минус один.');
+      showError(childrenField, childrenError, 'form.error.childrenMax');
       return false;
     }
 
@@ -1269,20 +1790,20 @@ var CABINS = {
 
   guestsField.addEventListener('input', function () {
     if (guestsError.textContent) clearError(guestsField, guestsError);
-    guestsHint.textContent = '';
+    clearHint(guestsHint);
     syncChildrenMax();
   });
 
   childrenField.addEventListener('input', function () {
     if (childrenError.textContent) clearError(childrenField, childrenError);
-    childrenHint.textContent = '';
+    clearHint(childrenHint);
   });
 
   /* --- Отправка --- */
 
   function setSending(isSending) {
     submitButton.disabled = isSending;
-    submitButton.textContent = isSending ? 'Отправляем…' : 'Отправить заявку';
+    submitButton.textContent = i18n.t(isSending ? 'form.sending' : 'form.submit');
   }
 
   form.addEventListener('submit', function (event) {
@@ -1321,7 +1842,8 @@ var CABINS = {
       phone: phoneField.value.trim(),
       cabin: cabinField.value,
       guests: parseInt(guestsField.value, 10),
-      children: childrenField.value.trim() === '' ? 0 : parseInt(childrenField.value, 10)
+      children: childrenField.value.trim() === '' ? 0 : parseInt(childrenField.value, 10),
+      arrival: arrivalField ? arrivalField.value : ''
     })
       .then(function () {
         form.hidden = true;
@@ -1332,6 +1854,21 @@ var CABINS = {
         setSending(false);
         formError.hidden = false;
       });
+  });
+
+  // Смена языка: статические подписи обновит общий проход, здесь — то,
+  // что скрипт пишет сам.
+  //
+  // applyCabinCapacity вызывать нельзя: он гасит подсказку, когда ужимать
+  // уже нечего, и показанное сообщение пропало бы при переключении языка.
+  i18n.onChange(function () {
+    if (cabinReadout) cabinReadout.textContent = cabinName(cabinField.value);
+    setSending(false);
+
+    Array.prototype.forEach.call(
+      form.parentNode.querySelectorAll('[data-i18n-live]'),
+      renderLive
+    );
   });
 
   applyCabinCapacity();

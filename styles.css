@@ -64,6 +64,9 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+
+  /* Якорные переходы останавливаются под шапкой, а не под её верхним краем */
+  scroll-padding-top: var(--header-height);
 }
 
 /* Плавная прокрутка только для тех, кто не просил уменьшить анимации */
@@ -243,6 +246,12 @@ dd {
   --duration-base: 280ms;
   --duration-slow: 600ms;
   --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* Высота липкой шапки: отступы сверху и снизу плюс самый высокий
+     элемент внутри (кнопка меню с зоной тапа 44px) плюс граница.
+     Нужна для scroll-padding-top: без неё якорный переход ставит верх
+     секции в ноль, и надзаголовок уезжает под шапку. */
+  --header-height: calc(2 * var(--space-s) + 44px + 1px);
 
   /* --- Слои --- */
   --z-base: 1;
@@ -488,6 +497,7 @@ p {
   isolation: isolate;
 }
 
+.hero__poster,
 .hero__video,
 .hero__scrim {
   position: absolute;
@@ -496,9 +506,25 @@ p {
   height: 100%;
 }
 
+/* Постер лежит под видео и виден с первого кадра отрисовки. Видео
+   проявляется поверх него, когда действительно начнёт играть, — так
+   первый экран не мигает и не прыгает. */
+.hero__poster {
+  z-index: -3;
+  background-image: url('assets/images/hero-poster.webp');
+  background-position: center;
+  background-size: cover;
+}
+
 .hero__video {
   z-index: -2;
   object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-out);
+}
+
+.hero__video.is-ready {
+  opacity: 1;
 }
 
 .hero__scrim {
@@ -597,6 +623,27 @@ p {
   color: var(--color-text-muted);
 }
 
+/* Появляется только в состоянии ошибки: раньше один отказ сети означал
+   мёртвый виджет до перезагрузки страницы. */
+.aurora-widget__retry {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: var(--space-2xs);
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-cta);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.aurora-widget__retry:hover {
+  color: var(--color-cta-hover);
+}
+
 .aurora-widget__source {
   margin-top: var(--space-s);
   font-size: var(--step--1);
@@ -656,11 +703,60 @@ p {
 .room-card__photo,
 .service-card__photo,
 .gallery__photo {
+  position: relative;
   display: block;
   width: 100%;
   padding: 0;
   overflow: hidden;
   cursor: zoom-in;
+}
+
+/* Индикатор кадров. Класс is-gallery ставит скрипт — только когда
+   снимков больше одного. */
+.room-card__dots {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-xs);
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+  transform: translateX(-50%);
+}
+
+.room-card__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--color-text) 40%, transparent);
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.room-card__dot.is-current {
+  background-color: var(--color-text);
+}
+
+/* Мягкий градиент от низа снимка: точки читаются и на светлом кадре.
+   Без блюр-подложки — она дороже, чем нужно для шести точек. */
+.room-card__photo.is-gallery::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 4.5rem;
+  background: linear-gradient(to top, rgba(14, 21, 18, 0.6), rgba(14, 21, 18, 0));
+  pointer-events: none;
+}
+
+/* Проявление нового кадра. Тем, кто просил меньше движения, смена мгновенная. */
+@media (prefers-reduced-motion: no-preference) {
+  .room-card__photo img.is-fresh {
+    animation: photo-in var(--duration-fast) var(--ease-out);
+  }
+}
+
+@keyframes photo-in {
+  from {
+    opacity: 0.3;
+  }
 }
 
 .room-card__photo img,
@@ -735,7 +831,8 @@ p {
 
 /* --- 4. Демо-календарь --- */
 
-.booking__note {
+.booking__note,
+.contacts__note {
   margin-bottom: var(--space-l);
   color: var(--color-text-muted);
 }
@@ -808,7 +905,10 @@ p {
 .calendar__weekdays,
 .calendar__grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  /* minmax(0, 1fr), а не 1fr: у 1fr неявный min-width: auto, и колонка
+     не может стать уже цены под числом. На 320px это распирало календарь
+     до 333px в колонке 288px и уводило всю страницу в прокрутку вбок. */
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: var(--space-3xs);
 }
 
@@ -985,6 +1085,17 @@ p {
 }
 
 /* --- Форма заявки (отправка — заглушка, см. script.js) --- */
+
+.booking__form-title {
+  margin-top: var(--space-l);
+  font-size: var(--step-1);
+}
+
+.booking__times {
+  margin-top: var(--space-s);
+  font-size: var(--step--1);
+  color: var(--color-text-muted);
+}
 
 .booking__form {
   display: grid;
@@ -1198,12 +1309,19 @@ p {
 
 /* --- 5. Услуги --- */
 
+/* Карточка тянется на всю высоту ячейки сетки, а цена прижата к низу —
+   тогда цены стоят в один ряд при описаниях разной длины.
+   Тот же приём, что в карточках номеров. */
 .service-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   padding: var(--space-m);
   border-top: var(--border-hairline);
 }
 
 .service-card__media {
+  flex-shrink: 0;
   margin-bottom: var(--space-s);
   border-radius: var(--radius-s);
   overflow: hidden;
@@ -1221,6 +1339,15 @@ p {
 
 .service-card__text {
   color: var(--color-text-muted);
+}
+
+/* Оформление как у цены номера, но на ступень мельче: услуга вторична */
+.service-card__price {
+  margin-top: auto;
+  padding-top: var(--space-2xs);
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+  color: var(--color-text);
 }
 
 @media (min-width: 48rem) {
@@ -1258,16 +1385,60 @@ p {
 }
 
 .location__map {
-  display: grid;
-  place-items: center;
-  min-height: 18rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-s);
   background-color: var(--color-surface);
   border: var(--border-hairline);
   border-radius: var(--radius-m);
 }
 
-.location__map-stub {
+/* На узком экране схема занимает почти всю карточку: её подписи
+   масштабируются вместе с ней, и лишние поля съедали бы кегль. */
+@media (min-width: 30rem) {
+  .location__map {
+    padding: var(--space-m);
+  }
+}
+
+/* Схема проезда — инлайновый SVG, без внешних карт и запросов.
+   Ширину ограничиваем: подписи внутри SVG масштабируются вместе с ним,
+   и без предела на десктопе они вырастают до неприличного кегля. */
+.location__scheme {
+  width: 100%;
+  max-width: 26rem;
+  height: auto;
+}
+
+.location__scheme .scheme-label {
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  fill: var(--color-text-muted);
+}
+
+.location__scheme .scheme-place {
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  font-weight: 600;
+  fill: var(--color-cta);
+}
+
+.location__scheme .scheme-fine {
+  font-family: var(--font-body);
+  font-size: var(--step--1);
+  fill: var(--color-text-faint);
+}
+
+.location__scheme-note {
+  font-size: var(--step--1);
   color: var(--color-text-faint);
+}
+
+.location__route {
+  width: 100%;
+  max-width: 26rem;
 }
 
 .location__steps {
@@ -1325,12 +1496,59 @@ p {
   color: var(--color-accent);
 }
 
-.logo--footer {
-  margin-bottom: var(--space-2xs);
+/* Кнопки идут столбиком на любой ширине и на любом языке.
+   Раньше это был flex с переносом: строки разной длины вставали то в один
+   ряд, то в два — в русском столбик, в английском «одна сверху, две снизу».
+   Сетка в одну колонку убирает зависимость от длины подписи. */
+.contacts__actions {
+  display: grid;
+  gap: var(--space-2xs);
+  margin-top: var(--space-m);
 }
 
-.site-footer__note {
+.contacts__actions .btn {
+  width: 100%;
+}
+
+/* Иконка слева от подписи. Кнопка — inline-flex с justify-content: center,
+   поэтому текст и иконка остаются одной группой по центру и не разъезжаются
+   по краям на широкой кнопке с коротким текстом (китайский). flex: none —
+   чтобы иконку не сжимало вместе с длинной подписью.
+   Цвет наследуется через currentColor и едет вместе с текстом на hover. */
+/* Контейнер спрайта: из потока убран, но не display: none — так надёжнее
+   для ссылок <use> и не мешает вычислению размеров. */
+.icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.btn__icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-right: var(--space-2xs);
+}
+
+/* Неброская текстовая ссылка, а не кнопка: рядом уже три кнопки,
+   четвёртая забрала бы у них внимание. */
+.contacts__cta {
+  margin-top: var(--space-l);
+}
+
+.contacts__cta a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: var(--space-xs);
+  margin-block: calc(var(--space-xs) * -1);
   color: var(--color-text-muted);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.contacts__cta a:hover {
+  color: var(--color-accent);
 }
 
 .site-footer__bottom {
@@ -1606,4 +1824,182 @@ p {
   .nav-panel {
     display: none;
   }
+}
+
+
+/* --------------------------------------------------------------------------
+   10. ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА
+   Компактный ряд: RU · EN · 中文. Текущий язык выделен цветом и весом.
+   -------------------------------------------------------------------------- */
+
+.lang {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3xs);
+}
+
+.lang__option {
+  min-height: 44px;                       /* зона нажатия, а не только текст */
+  padding-inline: var(--space-2xs);
+  font-size: var(--step--1);
+  color: var(--color-text-faint);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.lang__option:hover {
+  color: var(--color-text);
+}
+
+.lang__option.is-current {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.lang__sep {
+  color: var(--color-border);
+}
+
+/* В подвале переключатель стоит первым в строке с копирайтом,
+   отрицательное поле гасит добавленную зону нажатия */
+.site-footer__bottom .lang {
+  margin-block: calc(var(--space-2xs) * -1);
+}
+
+/* В мобильной панели — отдельной строкой под пунктами меню */
+.nav-panel .lang {
+  margin-top: var(--space-l);
+}
+
+.nav-panel .lang__option {
+  font-size: var(--step-0);
+}
+
+
+/* --------------------------------------------------------------------------
+   11. УВЕДОМЛЕНИЕ О ХРАНЕНИИ И ПРАВОВАЯ СТРАНИЦА
+   -------------------------------------------------------------------------- */
+
+/* Полоса у нижнего края: контент под ней виден, прокрутке не мешает.
+   Слой ниже модальных окон — они должны перекрывать уведомление. */
+.cookie {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: var(--z-header);
+  padding-block: var(--space-s);
+  padding-bottom: max(var(--space-s), calc(env(safe-area-inset-bottom) + var(--space-2xs)));
+  background-color: var(--color-surface);
+  border-top: var(--border-hairline);
+}
+
+.cookie__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+  width: 100%;
+  max-width: var(--container-width);
+  margin-inline: auto;
+  padding-inline: max(var(--container-gutter), env(safe-area-inset-left), env(safe-area-inset-right));
+}
+
+.cookie__text {
+  flex: 1 1 22rem;
+  max-width: none;
+  font-size: var(--step--1);
+  color: var(--color-text-muted);
+}
+
+/* Кнопки одинаковой ширины и в одном порядке на любом языке */
+.cookie__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2xs);
+  flex: 1 1 18rem;
+}
+
+.cookie__actions .btn {
+  /* Поля уже, чем у обычной кнопки: на узком экране два элемента делят
+     строку пополам, и с базовым отступом английское «Learn more»
+     переносилось на вторую строку. */
+  width: 100%;
+  padding-inline: var(--space-s);
+}
+
+@media (min-width: 48rem) {
+  .cookie__actions {
+    flex: 0 0 auto;
+    grid-template-columns: auto auto;
+  }
+
+  .cookie__actions .btn {
+    width: auto;
+  }
+}
+
+/* --- Правовая страница --- */
+
+.site-header__back {
+  font-size: var(--step--1);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.site-header__back:hover {
+  color: var(--color-accent);
+}
+
+.legal__title {
+  margin-bottom: var(--space-m);
+  font-size: var(--step-3);
+  font-weight: 600;
+}
+
+/* Врезка в самом начале: проект демонстрационный, тексты подставит владелец */
+.legal__notice {
+  max-width: var(--measure);
+  margin-bottom: var(--space-2xl);
+  padding: var(--space-m);
+  background-color: var(--color-surface);
+  border-left: 3px solid var(--color-cta);
+  border-radius: var(--radius-s);
+  color: var(--color-text);
+}
+
+.legal__section {
+  max-width: var(--measure);
+  margin-bottom: var(--space-2xl);
+}
+
+.legal__section:last-child {
+  margin-bottom: 0;
+}
+
+.legal__section .section__title {
+  margin-bottom: var(--space-2xs);
+  font-size: var(--step-2);
+}
+
+.legal__mark {
+  margin-bottom: var(--space-s);
+  font-size: var(--step--1);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-cta);
+}
+
+.legal__section p:last-child {
+  color: var(--color-text-muted);
+}
+
+.site-footer__legal {
+  font-size: var(--step--1);
+  color: var(--color-text-faint);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.site-footer__legal:hover {
+  color: var(--color-text);
 }

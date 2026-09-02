@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img"
+  aria-label="Sopki Retreat: сопки и точка сияния">
+  <!-- Фон — --color-bg, знак — --color-cta. В SVG-иконке переменные
+       страницы недоступны, поэтому значения записаны явно. -->
+  <rect width="64" height="64" rx="12" fill="#0E1512"/>
+  <circle cx="46" cy="17" r="6" fill="#B08D57"/>
+  <path d="M 4 52 L 23 22 L 36 41 L 45 30 L 60 52 Z" fill="#B08D57"/>
+</svg>
