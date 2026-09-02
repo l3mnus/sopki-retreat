@@ -1,0 +1,15 @@
+{
+  "name": "sopki-retreat",
+  "private": true,
+  "description": "Сборка: сжатие styles.css, script.js и i18n.js перед публикацией. Сайт статический (GitHub Pages), сборка запускается вручную — и .min-файлы, и исходники коммитятся в репозиторий.",
+  "scripts": {
+    "build:css": "cleancss -o styles.min.css styles.css",
+    "build:js": "terser script.js -o script.min.js --compress --mangle --comments false",
+    "build:i18n": "terser i18n.js -o i18n.min.js --compress --mangle --comments false",
+    "build": "npm run build:css && npm run build:js && npm run build:i18n"
+  },
+  "devDependencies": {
+    "clean-css-cli": "^5.6.3",
+    "terser": "^5.51.2"
+  }
+}

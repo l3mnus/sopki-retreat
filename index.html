@@ -18,6 +18,32 @@
   <meta property="og:description" content="Камерный ретрит на дороге между Мурманском и Териберкой — там, где сопки выходят к океану">
   <meta property="og:image" content="https://l3mnus.github.io/sopki-retreat/assets/images/hero-poster.webp">
 
+  <!-- Структурированные данные: schema.org/LodgingBusiness. Только факты —
+       без aggregateRating и review, реальных отзывов у демо-проекта нет,
+       а выдуманный рейтинг нарушает правила Google. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LodgingBusiness",
+    "name": "Sopki Retreat",
+    "description": "Камерный ретрит на дороге между Мурманском и Териберкой — там, где сопки выходят к океану",
+    "url": "https://l3mnus.github.io/sopki-retreat/",
+    "telephone": "+7-921-000-00-00",
+    "priceRange": "14000-24000 RUB",
+    "image": [
+      "https://l3mnus.github.io/sopki-retreat/assets/images/hero-poster.webp",
+      "https://l3mnus.github.io/sopki-retreat/assets/images/aurora-cabin-2.webp",
+      "https://l3mnus.github.io/sopki-retreat/assets/images/fjeld-suite-4.webp"
+    ],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "автодорога Р-21 «Кола» — Териберка, 47 км",
+      "addressRegion": "Мурманская область",
+      "addressCountry": "RU"
+    }
+  }
+  </script>
+
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
@@ -26,7 +52,7 @@
   <link rel="preload" href="fonts/cormorant-garamond-v21-cyrillic_latin-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/manrope-v20-cyrillic_latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.min.css">
 </head>
 
 <body>
@@ -54,6 +80,20 @@
   <div id="top"></div>
 
   <a class="skip-link" href="#main" data-i18n="a11y.skipLink">Перейти к содержимому</a>
+
+  <!-- Уведомление о хранении. Не модальное: фокус не запирается, сайтом
+       можно пользоваться не закрывая. Показывается один раз. -->
+  <aside class="cookie" data-cookie hidden
+    aria-label="Уведомление о хранении данных" data-i18n-label="cookie.label">
+    <div class="cookie__inner">
+      <p class="cookie__text" data-i18n="cookie.text">Сайт хранит в браузере только выбранный язык интерфейса. Аналитики и рекламных трекеров здесь нет.</p>
+
+      <div class="cookie__actions">
+        <button class="btn btn--primary" type="button" data-cookie-accept data-i18n="cookie.accept">Понятно</button>
+        <a class="btn btn--ghost" href="legal.html" data-i18n="cookie.more">Подробнее</a>
+      </div>
+    </div>
+  </aside>
 
   <header class="site-header">
     <div class="container site-header__inner">
@@ -172,7 +212,8 @@
             <div class="room-card__body">
               <h3 class="room-card__title">
                 <button class="room-card__title-btn" type="button"
-                  data-modal-open="modal-lightbox" data-gallery-open="aurora-cabin" data-gallery-index="0" data-i18n="rooms.aurora-cabin.title">Сияние</button>
+                  data-modal-open="modal-lightbox" data-gallery-open="aurora-cabin" data-gallery-index="0"
+                  data-i18n="rooms.aurora-cabin.title" data-i18n-label="rooms.aurora-cabin.gallery">Сияние</button>
               </h3>
               <p class="room-card__text" data-i18n="rooms.aurora-cabin.text">Отдельный домик с тёмной спальней и панорамным окном: сияние видно, не вставая с кровати</p>
               <ul class="room-card__specs">
@@ -199,7 +240,8 @@
             <div class="room-card__body">
               <h3 class="room-card__title">
                 <button class="room-card__title-btn" type="button"
-                  data-modal-open="modal-lightbox" data-gallery-open="fjeld-suite" data-gallery-index="0" data-i18n="rooms.fjeld-suite.title">Панорама</button>
+                  data-modal-open="modal-lightbox" data-gallery-open="fjeld-suite" data-gallery-index="0"
+                  data-i18n="rooms.fjeld-suite.title" data-i18n-label="rooms.fjeld-suite.gallery">Панорама</button>
               </h3>
               <p class="room-card__text" data-i18n="rooms.fjeld-suite.text">Панорамный люкс с окном во всю стену и собственной террасой</p>
               <ul class="room-card__specs">
@@ -226,7 +268,8 @@
             <div class="room-card__body">
               <h3 class="room-card__title">
                 <button class="room-card__title-btn" type="button"
-                  data-modal-open="modal-lightbox" data-gallery-open="ember-room" data-gallery-index="0" data-i18n="rooms.ember-room.title">Очаг</button>
+                  data-modal-open="modal-lightbox" data-gallery-open="ember-room" data-gallery-index="0"
+                  data-i18n="rooms.ember-room.title" data-i18n-label="rooms.ember-room.gallery">Очаг</button>
               </h3>
               <p class="room-card__text" data-i18n="rooms.ember-room.text">Камерный номер с камином и глубокой ванной, для тех, кто выбирает тепло вместо панорамы</p>
               <ul class="room-card__specs">
@@ -763,21 +806,7 @@
     </div>
   </div>
 
-  <!-- Уведомление о хранении. Не модальное: фокус не запирается, сайтом
-       можно пользоваться не закрывая. Показывается один раз. -->
-  <aside class="cookie" data-cookie hidden
-    aria-label="Уведомление о хранении данных" data-i18n-label="cookie.label">
-    <div class="cookie__inner">
-      <p class="cookie__text" data-i18n="cookie.text">Сайт хранит в браузере только выбранный язык интерфейса. Аналитики и рекламных трекеров здесь нет.</p>
-
-      <div class="cookie__actions">
-        <button class="btn btn--primary" type="button" data-cookie-accept data-i18n="cookie.accept">Понятно</button>
-        <a class="btn btn--ghost" href="legal.html" data-i18n="cookie.more">Подробнее</a>
-      </div>
-    </div>
-  </aside>
-
-  <script src="i18n.js" defer></script>
-  <script src="script.js" defer></script>
+  <script src="i18n.min.js" defer></script>
+  <script src="script.min.js" defer></script>
 </body>
 </html>

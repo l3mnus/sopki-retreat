@@ -150,6 +150,23 @@ var i18n = (function () {
 })();
 
 
+/* --------------------------------------------------------------------------
+   Год в копирайте
+
+   В разметке стоит год выпуска — он виден, пока не отработал скрипт,
+   и остаётся, если скрипт не выполнился вовсе. Дальше подставляется
+   текущий: иначе подвал протухает 1 января сразу на двух страницах.
+   -------------------------------------------------------------------------- */
+
+(function initCopyrightYear() {
+  var year = String(new Date().getFullYear());
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-year]'), function (node) {
+    node.textContent = year;
+  });
+})();
+
+
 /* Скорость фонового видео на первом экране: 1 — как снято, меньше — медленнее.
    Значение подбирается на глаз, менять здесь. */
 var HERO_PLAYBACK_RATE = 0.6;
@@ -1163,6 +1180,8 @@ var CABINS = {
 
 var lightbox = (function initLightbox() {
   var SWIPE_THRESHOLD = 40; // px, короче — считаем случайным касанием
+  var FADE_DURATION = 160;  // мс, тот же `--duration-fast`, что и в styles.css
+  var REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   var modal = document.getElementById('modal-lightbox');
   if (!modal) return;
@@ -1250,21 +1269,49 @@ var lightbox = (function initLightbox() {
     return photo.altKey ? i18n.t(photo.altKey) : (photo.alt || '');
   }
 
+  var switchTimer = null;
+
   function show(next) {
     if (photos.length === 0) return;
 
-    index = (next % photos.length + photos.length) % photos.length;
+    var newIndex = (next % photos.length + photos.length) % photos.length;
+    // Тот же кадр просят перерисовать при смене языка — там меняется
+    // только подпись, гаснуть и загораться заново нечему.
+    var samePhoto = newIndex === index;
+    index = newIndex;
 
     var photo = photos[index];
-    imageEl.setAttribute('src', photo.src);
-    imageEl.setAttribute('alt', altOf(photo));
-    if (photo.width) imageEl.setAttribute('width', photo.width);
-    if (photo.height) imageEl.setAttribute('height', photo.height);
 
-    counterEl.textContent = (index + 1) + ' / ' + photos.length;
+    function apply() {
+      imageEl.setAttribute('src', photo.src);
+      imageEl.setAttribute('alt', altOf(photo));
+      if (photo.width) imageEl.setAttribute('width', photo.width);
+      if (photo.height) imageEl.setAttribute('height', photo.height);
 
-    // Одно фото — перелистывать нечего, прячем и стрелки, и счётчик
-    barEl.hidden = photos.length < 2;
+      counterEl.textContent = (index + 1) + ' / ' + photos.length;
+
+      // Одно фото — перелистывать нечего, прячем и стрелки, и счётчик
+      barEl.hidden = photos.length < 2;
+    }
+
+    if (switchTimer) {
+      window.clearTimeout(switchTimer);
+      switchTimer = null;
+    }
+
+    // Затухание — только при реальной смене кадра и только тем, кто не
+    // просил меньше движения. На самое первое открытие (src ещё пуст)
+    // тоже не распространяется: гаснуть там нечему, только тормозит показ.
+    if (!REDUCE_MOTION.matches && !samePhoto && imageEl.getAttribute('src')) {
+      imageEl.classList.add('is-switching');
+      switchTimer = window.setTimeout(function () {
+        switchTimer = null;
+        apply();
+        imageEl.classList.remove('is-switching');
+      }, FADE_DURATION);
+    } else {
+      apply();
+    }
   }
 
   // Перехват: набор должен быть готов до того, как окно откроется
@@ -1276,8 +1323,12 @@ var lightbox = (function initLightbox() {
     show(parseInt(trigger.getAttribute('data-gallery-index'), 10) || 0);
   }, true);
 
-  prevBtn.addEventListener('click', function () { show(index - 1); });
-  nextBtn.addEventListener('click', function () { show(index + 1); });
+  // Явный .focus(): клик мышью по кнопке не везде переводит на неё фокус
+  // сам по себе (например, Safari на macOS по умолчанию этого не делает).
+  // Без этой строки фокус оставался там, где был при открытии окна —
+  // на кнопке закрытия — и рамка фокуса «прилипала» к ней на каждый клик.
+  prevBtn.addEventListener('click', function () { show(index - 1); prevBtn.focus(); });
+  nextBtn.addEventListener('click', function () { show(index + 1); nextBtn.focus(); });
 
   document.addEventListener('keydown', function (event) {
     if (modal.hidden || photos.length < 2) return;
@@ -1362,6 +1413,12 @@ var lightbox = (function initLightbox() {
 
     button.classList.add('is-gallery');
 
+    // На первый показ анимации ещё не было — перезапускать нечего, а
+    // принудительный reflow (offsetWidth) на ещё не отрисованной странице
+    // стоит дорого: замер показал ~10мс на первой же карточке против
+    // долей миллисекунды на следующих, когда layout уже посчитан.
+    var hasRendered = false;
+
     function render() {
       var photo = photos[index];
 
@@ -1386,8 +1443,11 @@ var lightbox = (function initLightbox() {
       // Перезапуск анимации проявления: снимаем класс, заставляем браузер
       // пересчитать стиль, возвращаем. Сама анимация объявлена только для
       // тех, кто не просил уменьшить движение.
-      image.classList.remove('is-fresh');
-      void image.offsetWidth;
+      if (hasRendered) {
+        image.classList.remove('is-fresh');
+        void image.offsetWidth;
+      }
+      hasRendered = true;
       image.classList.add('is-fresh');
     }
 

@@ -206,6 +206,7 @@ dd {
   --font-body: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* --- Типографическая шкала (mobile-first, плавная через clamp) --- */
+  --step--2: clamp(0.75rem, 0.73rem + 0.10vw, 0.80rem);
   --step--1: clamp(0.83rem, 0.80rem + 0.15vw, 0.90rem);
   --step-0:  clamp(1.00rem, 0.96rem + 0.20vw, 1.13rem);
   --step-1:  clamp(1.25rem, 1.15rem + 0.50vw, 1.55rem);
@@ -238,7 +239,6 @@ dd {
   /* --- Форма --- */
   --radius-s: 4px;
   --radius-m: 8px;
-  --radius-l: 16px;
   --border-hairline: 1px solid var(--color-border);
 
   /* --- Движение --- */
@@ -490,7 +490,10 @@ p {
   position: relative;
   display: grid;
   align-items: end;
-  min-height: 100svh;
+  /* Минус высота шапки: она стоит в потоке над героем, поэтому при чистых
+     100svh нижние 77px первого экрана всегда оказывались за фолдом — а там
+     по align-items: end как раз и стоит кнопка «Проверьте свободные даты». */
+  min-height: calc(100svh - var(--header-height));
   padding-block: var(--space-3xl) var(--space-2xl);
   padding-bottom: max(var(--space-2xl), env(safe-area-inset-bottom));
   overflow: hidden;
@@ -711,6 +714,15 @@ p {
   cursor: zoom-in;
 }
 
+/* Общее правило :focus-visible скругляет рамку на --radius-s (4px) —
+   на фото номера это не совпадает со скруглением самой карточки
+   (--radius-m, 8px), которое кадру задаёт .room-card через overflow:
+   hidden. Фото — то же исключение, что и степпер: рамка идёт под
+   реальную форму поля, а не под общий токен. */
+.room-card__photo:focus-visible {
+  border-radius: var(--radius-m);
+}
+
 /* Индикатор кадров. Класс is-gallery ставит скрипт — только когда
    снимков больше одного. */
 .room-card__dots {
@@ -771,16 +783,31 @@ p {
   transform: scale(1.03);
 }
 
+/* Заголовок открывает галерею, но выглядел обычным текстом: на тач-экране
+   признаков интерактивности не было вовсе (курсор там не показывается).
+   Подчёркивание проявляется при наведении и с клавиатуры — как у ссылок.
+   Вертикальные поля добирают зону нажатия до 44px, отрицательные внешние
+   отступы возвращают заголовок на прежнее место в раскладке. */
 .room-card__title-btn {
-  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: var(--space-xs);
+  margin-block: calc(var(--space-xs) * -1);
   font: inherit;
   color: inherit;
   text-align: left;
-  transition: color var(--duration-fast) var(--ease-out);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: color var(--duration-fast) var(--ease-out),
+              text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
-.room-card__title-btn:hover {
+.room-card__title-btn:hover,
+.room-card__title-btn:focus-visible {
   color: var(--color-accent);
+  text-decoration-color: currentColor;
 }
 
 .room-card__body {
@@ -859,6 +886,7 @@ p {
 
 .calendar__cabins label {
   font-size: var(--step--1);
+  font-weight: 600;
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--color-text-faint);
@@ -1111,12 +1139,14 @@ p {
 .form-field label,
 .form-field__label {
   font-size: var(--step--1);
+  font-weight: 600;
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--color-text-faint);
 }
 
 .required {
+  font-weight: 600;
   color: var(--color-cta);
 }
 
@@ -1247,6 +1277,14 @@ p {
 
 .form-field .stepper__value:hover {
   border-color: transparent;
+}
+
+/* Общее правило :focus-visible скругляет рамку на 4px — угловато рядом
+   со степпером-пилюлей (border-radius: 999px у контейнера). Скругляем
+   сильнее только на фокусе: в покое border-radius: 0 остаётся нужен,
+   иначе поле не встанет заподлицо с закруглёнными кнопками по бокам. */
+.form-field .stepper__value:focus-visible {
+  border-radius: 999px;
 }
 
 /* Родные стрелки браузера убираем: свои кнопки уже есть */
@@ -1452,8 +1490,11 @@ p {
   border-top: var(--border-hairline);
 }
 
+/* Единственное исключение из правила «h3 остаётся 400»: эти четыре
+   заголовка ведут себя как ярлыки шагов, а не как обычные подзаголовки. */
 .location__step-title {
   margin-bottom: var(--space-3xs);
+  font-weight: 600;
 }
 
 .location__steps p {
@@ -1473,6 +1514,20 @@ p {
   padding-bottom: max(var(--space-l), env(safe-area-inset-bottom));
 }
 
+/* Короткий подвал legal.html: нет сетки контактов, поэтому и большой
+   верхний отступ секции ни к чему. */
+.site-footer--slim {
+  padding-top: var(--space-xl);
+}
+
+.site-footer--slim .site-footer__bottom {
+  margin-top: 0;
+}
+
+.site-footer__home:hover {
+  color: var(--color-text);
+}
+
 .site-footer__grid {
   display: grid;
   gap: var(--space-xl);
@@ -1487,6 +1542,7 @@ p {
 
 .contacts__label {
   font-size: var(--step--1);
+  font-weight: 600;
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--color-text-faint);
@@ -1606,7 +1662,7 @@ p {
   padding: var(--space-l);
   background-color: var(--color-surface);
   border: var(--border-hairline);
-  border-radius: var(--radius-l);
+  border-radius: var(--radius-m);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1686,6 +1742,23 @@ p {
   gap: var(--space-s);
 }
 
+/* Крестик стоит поверх снимка, а не поверх фона диалога — на светлом
+   кадре бледно-серый значок терялся. Тёмная полупрозрачная подложка
+   с блюром держит контраст независимо от того, что на фото. Только
+   в лайтбоксе: у обычного модального окна крестик и так на сплошном
+   фоне карточки. */
+.modal--lightbox .modal__close {
+  background-color: rgba(14, 21, 18, 0.5);
+  backdrop-filter: blur(4px);
+  border-radius: 50%;
+  color: var(--color-text);
+}
+
+.modal--lightbox .modal__close:hover {
+  background-color: rgba(14, 21, 18, 0.7);
+  color: var(--color-text);
+}
+
 .lightbox {
   display: flex;
   flex-direction: column;
@@ -1708,6 +1781,20 @@ p {
   max-height: 70vh;
   object-fit: contain;
   border-radius: var(--radius-s);
+}
+
+/* Затухание между кадрами при листании. Смены src без него были резкими —
+   кадр менялся мгновенно. Переход объявлен только здесь: тем, кто просил
+   меньше движения, opacity вообще не в игре, класс is-switching ничего
+   не даёт визуально. */
+@media (prefers-reduced-motion: no-preference) {
+  .lightbox__image {
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+
+  .lightbox__image.is-switching {
+    opacity: 0;
+  }
 }
 
 .lightbox__bar {
@@ -1805,17 +1892,24 @@ p {
   color: var(--color-accent);
 }
 
-/* Своя анимация вместо общей modal-in; под prefers-reduced-motion её нет */
+/* Своя анимация вместо общей modal-in; под prefers-reduced-motion её нет.
+   Панель полноэкранная и непрозрачная — те же --duration-base (280мс)
+   и небольшой сдвиг, что уместны для мелкого плавающего диалога
+   лайтбокса, на весь экран почти не видны: движение тонет в размере
+   вьюпорта, и появление читается как резкая смена кадра, хотя технически
+   проигрывается корректно. Кривая осталась --ease-out (та же, что везде
+   на сайте), а длительность и масштаб увеличены — подтверждено на
+   реальном устройстве. */
 @media (prefers-reduced-motion: no-preference) {
   .nav-panel__dialog {
-    animation: nav-panel-in var(--duration-base) var(--ease-out);
+    animation: nav-panel-in 380ms var(--ease-out);
   }
 }
 
 @keyframes nav-panel-in {
   from {
     opacity: 0;
-    transform: translateY(-1.5rem);
+    transform: scale(0.95) translateY(-1.5rem);
   }
 }
 
@@ -1910,6 +2004,31 @@ p {
   color: var(--color-text-muted);
 }
 
+/* На узком экране баннер занимал 161px — пятую часть экрана — и накрывал
+   главную кнопку первого экрана. Ужимаем поля, межстрочный интервал и
+   высоту кнопок: до кнопки героя можно дотянуться, не закрывая баннер. */
+@media (max-width: 47.99rem) {
+  .cookie {
+    padding-block: var(--space-2xs);
+    padding-bottom: max(var(--space-2xs), calc(env(safe-area-inset-bottom) + var(--space-3xs)));
+  }
+
+  .cookie__inner {
+    gap: var(--space-2xs);
+  }
+
+  .cookie__text {
+    flex-basis: 100%;
+    font-size: var(--step--2);
+    line-height: 1.35;
+  }
+
+  .cookie__actions .btn {
+    min-height: 38px;
+    padding-block: var(--space-3xs);
+  }
+}
+
 /* Кнопки одинаковой ширины и в одном порядке на любом языке */
 .cookie__actions {
   display: grid;
@@ -1924,6 +2043,13 @@ p {
      переносилось на вторую строку. */
   width: 100%;
   padding-inline: var(--space-s);
+}
+
+/* На legal.html кнопка одна: незачем отдавать ей половину строки */
+.cookie__actions--single {
+  grid-template-columns: auto;
+  justify-content: start;
+  flex: 0 0 auto;
 }
 
 @media (min-width: 48rem) {
@@ -1951,10 +2077,11 @@ p {
   color: var(--color-accent);
 }
 
+/* Вес 400, как у h1 на главной: 600 закреплён за заголовками секций */
 .legal__title {
   margin-bottom: var(--space-m);
   font-size: var(--step-3);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 /* Врезка в самом начале: проект демонстрационный, тексты подставит владелец */
@@ -1985,6 +2112,7 @@ p {
 .legal__mark {
   margin-bottom: var(--space-s);
   font-size: var(--step--1);
+  font-weight: 600;
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--color-cta);

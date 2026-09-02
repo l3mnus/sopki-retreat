@@ -25,6 +25,10 @@ $RECYCLE.BIN/
 *.swp
 *~
 
+# Сборка минификации (npm run build) — ставится локально из package.json,
+# .min-файлы результата коммитятся, сам node_modules — нет
+node_modules/
+
 # Исходники медиа до сжатия (в репозиторий попадают только WebP / MP4 / WebM)
 assets/images/_src/
 assets/video/_src/

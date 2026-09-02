@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  <title>Правовая информация — Sopki Retreat</title>
+  <title data-i18n="legal.pageTitle">Правовая информация — Sopki Retreat</title>
   <meta name="description" content="Правовая информация проекта Sopki Retreat: политика конфиденциальности, согласие на обработку персональных данных, пользовательское соглашение, реквизиты.">
   <meta name="theme-color" content="#0E1512">
   <meta name="robots" content="noindex">
@@ -16,7 +16,7 @@
   <link rel="preload" href="fonts/cormorant-garamond-v21-cyrillic_latin-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/manrope-v20-cyrillic_latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.min.css">
 </head>
 
 <body>
@@ -42,6 +42,20 @@
 
   <a class="skip-link" href="#main" data-i18n="a11y.skipLink">Перейти к содержимому</a>
 
+  <!-- Уведомление о хранении. Не модальное: фокус не запирается, сайтом
+       можно пользоваться не закрывая. Показывается один раз. -->
+  <aside class="cookie" data-cookie hidden
+    aria-label="Уведомление о хранении данных" data-i18n-label="cookie.label">
+    <div class="cookie__inner">
+      <p class="cookie__text" data-i18n="cookie.text">Сайт хранит в браузере только выбранный язык интерфейса. Аналитики и рекламных трекеров здесь нет.</p>
+
+      <!-- «Подробнее» здесь нет: ссылка вела бы на эту же страницу -->
+      <div class="cookie__actions cookie__actions--single">
+        <button class="btn btn--primary" type="button" data-cookie-accept data-i18n="cookie.accept">Понятно</button>
+      </div>
+    </div>
+  </aside>
+
   <!-- Шапка упрощённая: логотип и возврат на главную -->
   <header class="site-header">
     <div class="container site-header__inner">
@@ -59,28 +73,28 @@
         <p class="legal__notice" data-i18n="legal.notice">Это демонстрационный проект. Юридические тексты заполняет владелец бизнеса; здесь размещены структурные заглушки.</p>
 
         <section class="legal__section" aria-labelledby="legal-privacy">
-          <p class="section__eyebrow">01</p>
+          <p class="section__eyebrow" data-i18n="legal.privacy.eyebrow">01 — Политика конфиденциальности</p>
           <h2 class="section__title" id="legal-privacy" data-i18n="legal.privacy.title">Политика конфиденциальности</h2>
           <p class="legal__mark" data-i18n="legal.placeholder">Заполняет владелец сайта</p>
           <p data-i18n="legal.privacy.text">Здесь описывается, какие данные собирает сайт, на каком основании и как долго они хранятся. Указываются оператор обработки, цели, перечень собираемых сведений, порядок передачи третьим лицам и способ отзыва согласия. Отдельно поясняется, что сохраняется в браузере посетителя и зачем.</p>
         </section>
 
         <section class="legal__section" aria-labelledby="legal-consent">
-          <p class="section__eyebrow">02</p>
+          <p class="section__eyebrow" data-i18n="legal.consent.eyebrow">02 — Согласие на обработку персональных данных</p>
           <h2 class="section__title" id="legal-consent" data-i18n="legal.consent.title">Согласие на обработку персональных данных</h2>
           <p class="legal__mark" data-i18n="legal.placeholder">Заполняет владелец сайта</p>
           <p data-i18n="legal.consent.text">Здесь приводится форма согласия, которое посетитель даёт при отправке заявки: кому даётся, на какие действия с данными, на какой срок и как его отозвать. Перечисляются категории данных — имя, телефон, даты и параметры брони.</p>
         </section>
 
         <section class="legal__section" aria-labelledby="legal-terms">
-          <p class="section__eyebrow">03</p>
+          <p class="section__eyebrow" data-i18n="legal.terms.eyebrow">03 — Пользовательское соглашение</p>
           <h2 class="section__title" id="legal-terms" data-i18n="legal.terms.title">Пользовательское соглашение</h2>
           <p class="legal__mark" data-i18n="legal.placeholder">Заполняет владелец сайта</p>
           <p data-i18n="legal.terms.text">Здесь фиксируются правила пользования сайтом: статус размещённых сведений, порядок бронирования и оплаты, условия отмены и переноса, ответственность сторон, порядок разрешения споров и применимое право.</p>
         </section>
 
         <section class="legal__section" aria-labelledby="legal-details">
-          <p class="section__eyebrow">04</p>
+          <p class="section__eyebrow" data-i18n="legal.details.eyebrow">04 — Реквизиты</p>
           <h2 class="section__title" id="legal-details" data-i18n="legal.details.title">Реквизиты</h2>
           <p class="legal__mark" data-i18n="legal.placeholder">Заполняет владелец сайта</p>
           <p data-i18n="legal.details.text">Здесь размещаются реквизиты: полное наименование, ИНН и ОГРН, юридический и фактический адрес, банковские реквизиты, контактный телефон и адрес для юридически значимых сообщений.</p>
@@ -89,53 +103,11 @@
     </section>
   </main>
 
-  <!-- 8. КОНТАКТЫ / FOOTER -->
-  <footer class="site-footer" id="contacts-legal" aria-labelledby="contacts-title-legal">
+  <!-- Подвал на этой странице короткий: контакты и призывы к действию
+       на юридической странице неуместны, человек пришёл читать условия.
+       Полный подвал остаётся на главной. -->
+  <footer class="site-footer site-footer--slim">
     <div class="container">
-      <p class="section__eyebrow" data-i18n="contacts.eyebrow">07 — Контакты</p>
-      <h2 class="section__title" id="contacts-title-legal" data-i18n="contacts.title">Ждём вас на 69-й параллели</h2>
-      <p class="contacts__note" data-i18n="contacts.note">Отвечаем в течение дня. Если едете за сиянием — напишите заранее,
-        поможем выбрать даты по прогнозу</p>
-
-      <div class="site-footer__grid">
-        <address class="contacts">
-          <p class="contacts__row">
-            <span class="contacts__label" data-i18n="contacts.phone">Телефон</span>
-            <a href="tel:+79210000000">+7 (921) 000-00-00</a>
-          </p>
-          <p class="contacts__row">
-            <span class="contacts__label" data-i18n="contacts.email">Почта</span>
-            <a href="mailto:hello@sopki-retreat.ru">hello@sopki-retreat.ru</a>
-          </p>
-          <p class="contacts__row">
-            <span class="contacts__label" data-i18n="contacts.address">Адрес</span>
-            <span data-i18n="contacts.addressValue">Мурманская область, автодорога Р-21 «Кола» — Териберка, 47 км</span>
-          </p>
-        </address>
-
-        <!-- Ссылки-заглушки: номер тот же, что в контактах.
-             Координаты условные — точка на дороге между Мурманском и Териберкой. -->
-        <ul class="contacts__actions">
-          <li>
-            <a class="btn btn--ghost" href="https://wa.me/79210000000"
-              target="_blank" rel="noopener noreferrer"><svg class="btn__icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-phone"/></svg>
-              <span data-i18n="contacts.whatsapp">Написать в WhatsApp</span></a>
-          </li>
-          <li>
-            <a class="btn btn--ghost" href="https://t.me/+79210000000"
-              target="_blank" rel="noopener noreferrer"><svg class="btn__icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-plane"/></svg>
-              <span data-i18n="contacts.telegram">Написать в Telegram</span></a>
-          </li>
-          <li>
-            <a class="btn btn--ghost" href="https://yandex.ru/maps/?rtext=~69.050000%2C34.350000&amp;rtt=auto"
-              target="_blank" rel="noopener noreferrer"><svg class="btn__icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-pin"/></svg>
-              <span data-i18n="location.route">Построить маршрут</span></a>
-          </li>
-        </ul>
-      </div>
-
-      <p class="contacts__cta"><a href="index.html#booking" data-i18n="contacts.cta">Выбрать даты&nbsp;&rarr;</a></p>
-
       <div class="site-footer__bottom">
         <div class="lang" role="group" data-i18n-label="lang.label" aria-label="Язык интерфейса">
           <button class="lang__option" type="button" data-lang="ru" aria-pressed="true">RU</button>
@@ -146,26 +118,12 @@
         </div>
 
         <p class="site-footer__copy">&copy; <span data-year>2026</span> Sopki Retreat</p>
-        <a class="site-footer__top-link" href="#top" data-i18n="contacts.top">Наверх</a>
+        <a class="site-footer__home" href="index.html" data-i18n="legal.home">На главную</a>
       </div>
     </div>
   </footer>
 
-  <!-- Уведомление о хранении. Не модальное: фокус не запирается, сайтом
-       можно пользоваться не закрывая. Показывается один раз. -->
-  <aside class="cookie" data-cookie hidden
-    aria-label="Уведомление о хранении данных" data-i18n-label="cookie.label">
-    <div class="cookie__inner">
-      <p class="cookie__text" data-i18n="cookie.text">Сайт хранит в браузере только выбранный язык интерфейса. Аналитики и рекламных трекеров здесь нет.</p>
-
-      <div class="cookie__actions">
-        <button class="btn btn--primary" type="button" data-cookie-accept data-i18n="cookie.accept">Понятно</button>
-        <a class="btn btn--ghost" href="legal.html" data-i18n="cookie.more">Подробнее</a>
-      </div>
-    </div>
-  </aside>
-
-  <script src="i18n.js" defer></script>
-  <script src="script.js" defer></script>
+  <script src="i18n.min.js" defer></script>
+  <script src="script.min.js" defer></script>
 </body>
 </html>
